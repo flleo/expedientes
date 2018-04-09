@@ -1,4 +1,4 @@
-var app = new Vue({
+var app_e = new Vue({
 
     el: "#root",
     data: {
@@ -7,46 +7,30 @@ var app = new Vue({
         showingdeleteModal: false,
         errorMessage: "",
         successMessage: "",
-        users: [],
-        newUser: {username: "", email: "", mobile: ""},
-        checkUser: {email: "", password: ""},
-        clickedUser: {},
+        expedientes: [],
+        newExpediente:{urgente: "",idTipoExpediente=0,fecha="",numero="",idTitular=0,idDireccion=0,idProyectista=0,idCalificacion=0,idIAE=0,idCalificado=0,descripcion=""},
+        clickedExpediente: {},
 
     },
     mounted: function () {
         console.log("Expedientes");
-        this.getAllUsers();
+        this.getAllEpedientes();
     },
     methods: {
-        checkingUser: function () {
-            console.log("mandado a loguear,...");
-            var formData = app.toFormData(app.checkUser);
-            axios.get("http://localhost/expedientes/api.php?action=checkLogin", formData)
-                   .then(function (response) {
-                        console.log(response);
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-                           
-                        } else {
-                            app.users = response.data.users;
-                         
-                        }
-                    });
-                    
-        },
 
-        getAllUsers: function () {
-            axios.get("http://localhost/expedientes/api.php?action=read")
+
+        getAllExpedientes: function () {
+            axios.get("http://localhost/expedientes/php/expediente.php?action=read")
                     .then(function (response) {
                         console.log(response);
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
                         } else {
-                            app.users = response.data.users;
+                            app.expedientes = response.data.expedientes;
                         }
                     });
         },
-        saveUser: function () {
+        user in usersuser in userssaveUser: function () {
 
             var formData = app.toFormData(app.newUser);
             axios.post("http://localhost/expedientes/api.php?action=create", formData)
