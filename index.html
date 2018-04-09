@@ -1,137 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>VueJS CRUD project By KK</title>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css">
-	<link rel="stylesheet" href="style.css">
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.min.js"></script>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Expedientes</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css">
+        <link rel="stylesheet" href="style.css">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.min.js"></script>
+    </head>
+    <body>
 
 
-	<div id="root">
+        <div id="root">
 
-		<div class="">
-			<div class="crud_header">
-				<h1 class="left">EXPEDIENTES</h1>
-				<button class="right addnew" @click="showingModal = true;">Login</button>
-				<div class="fix"></div>
-			</div>
+            <div class="">
+                <div class="crud_header">
+                    <h1 class="left">EXPEDIENTES</h1>
+                    <button class="right addnew" @click="showingModal = true;">Login</button>
+                    <button class="right addnew" @click="showingNuevoExpediente = true;">Nuevo</button>
+                    <div class="fix"></div>
+                </div>
 
-			<hr>
-			<p class="errorMessage" v-if="errorMessage">{{errorMessage}}</p>
-			<p class="successMessage" v-if="successMessage">{{successMessage}}</p>
+                <hr>
+                <p class="errorMessage" v-if="errorMessage">{{errorMessage}}</p>
+                <p class="successMessage" v-if="successMessage">{{successMessage}}</p>
 
-			<table class="list">
-				<tr>
-					<th>ID</th>
-					<th>IdUrgente</th>
-					<th>IdTipo</th>
-					<th>fecha</th>
-					<th>Numero</th>
-					<th>IdTitular</th>
-          <th>IdDireccion</th>
-          <th>IdProyectista</th>
-          <th>IdCalificacion</th>
-          <th>IdIAE</th>
-          <th>IdEstado</th>
-          <th>Descripcion</th-->
-				</tr-->
-				<tr v-for="expediente in expedientes">
-					<td>{{expediente.id}}</td>
-					<td>{{expediente.idUrgente}}</td>
-					<td>{{expediente.idTipoExpediente}}</td>
-					<td>{{expediente.fecha}}</td>
-          <td>{{expediente.numero}}</td>
-					<td>{{expediente.idTitular}}</td>
-					<td>{{expediente.idDireccion}}</td>
-					<td>{{expediente.idProyectista}}</td>
-          <td>{{expediente.idCalificacion}}</td>
-					<td>{{expediente.idIAE}}</td>
-					<td>{{expediente.idEstado}}</td>
-					<td>{{expediente.descripcion}}</td>
-					<td><button @click="showingeditModal = true; selectUser(user)">Edit</button></td>
-					<td><button @click="showingdeleteModal = true; selectUser(user)" >Delete</button></td>
-				</tr>
-			</table>
-			<div class="fix"></div>
-			<div class="modal col-md-6" id="addmodal" v-if="showingModal">
-				<div class="modalheading">
-					<p class="left">Add new user</p>
-					<p class="right close" @click="showingModal = false;">x</p>
-					<div class="fix"></div>
-				</div>
-				<div class="modalbody">
-					<div class="modalcontent">
-						<table class="form">							
-							<tr>
-								<th>Email Adress</th>
-								<th>:</th>
-								<td><input type="email" placeholder="Email" v-model="newUser.email"></td>
-							</tr>
-							<tr>
-								<th>Phone Number</th>
-								<th>:</th>
-								<td><input type="text" placeholder="Phone" v-model="newUser.mobile"></td>
-							</tr>
-						</table>
-						<div class="margin"></div>
-						<button class="center"  @click="showingModal = false; saveUser();" >Add User</button>
-					</div>
-				</div>
-			</div>
-		<div class="modal col-md-6" id="editmodal" v-if="showingeditModal">
-				<div class="modalheading">
-					<p class="left">Edit user</p>
-					<p class="right close" @click="showingeditModal = false;">x</p>
-					<div class="fix"></div>
-				</div>
-				<div class="modalbody">
-					<div class="modalcontent">
-						<table class="form">
-							<tr>
-								<th>Email Adress</th>
-								<th>:</th>
-								<td><input type="email" placeholder="Email Adress" v-model="clickedUser.email"></td>
-							</tr>
-							<tr>
-								<th>Phone Number</th>
-								<th>:</th>
-								<td><input type="text" placeholder="Phone Number"  v-model="clickedUser.mobile"></td>
-							</tr>
-						</table>
-						<div class="margin"></div>
-						<button class="center"  @click="showingeditModal = false; updateUser()">Update User</button>
-					</div>
-				</div>
-			</div>
-			<div class="modal col-md-6" id="deletemodal" v-if="showingdeleteModal">
-				<div class="modalheading">
-					<p class="left">Delete user</p>
-					<p class="right close" @click="showingdeleteModal = false;">x</p>
-					<div class="fix"></div>
-				</div>
-				<div class="modalbody">
-					<div class="modalcontent">
+                <table class="list">
+                    <tr>
+                        <th>ID</th>
+                        <th>IdUrgente</th>
+                        <th>IdTipo</th>
+                        <th>fecha</th>
+                        <th>Numero</th>
+                        <th>IdTitular</th>
+                        <th>IdDireccion</th>
+                        <th>IdProyectista</th>
+                        <th>IdCalificacion</th>
+                        <th>IdIAE</th>
+                        <th>IdEstado</th>
+                        <th>Descripcion</th-->
+                            </tr-->
+                    <tr v-for="expediente in expedientes">
+                        <td>{{expediente.id}}</td>
+                        <td>{{expediente.idUrgente}}</td>
+                        <td>{{expediente.idTipoExpediente}}</td>
+                        <td>{{expediente.fecha}}</td>
+                        <td>{{expediente.numero}}</td>
+                        <td>{{expediente.idTitular}}</td>
+                        <td>{{expediente.idDireccion}}</td>
+                        <td>{{expediente.idProyectista}}</td>
+                        <td>{{expediente.idCalificacion}}</td>
+                        <td>{{expediente.idIAE}}</td>
+                        <td>{{expediente.idEstado}}</td>
+                        <td>{{expediente.descripcion}}</td>
+                        <td><button @click="showingEditarExpediente = true; selectExpediente(expediente)">Editar</button></td>
+                        <td><button @click="showingDeleteExpediente = true; selectExpediente(expediente)" >Eliminar</button></td>
+                    </tr>
+                </table>
 
-						<div class="margin"></div>
-						<h3 class="center">Are you sure to Delete?</h3>
-						<div class="margin"></div>
-						<h4 class="center">{{clickedUser.username}}</h4>
-						<div class="margin"></div>
-						<div class="col-md-6 center">
-							<button class="left" @click="showingdeleteModal = false; deleteUser()">YES</button>
-							<button class="right" @click="showingdeleteModal = false;">NO</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js"></script>
-	<script type="text/javascript" src="js/app.js"></script>
+                <!--Añadir nuevo expediente -->
+
+                <div class="modal col-md-6" id="addmodal" v-if="showingNuevoExpediente">
+                    <div class="modalheading">
+                        <p class="left">Añade nuevo expediente</p>
+                        <p class="right close" @click="showingNuevoExpediente = false;">x</p>
+                        <div class="fix"></div>
+                    </div>
+                    <div class="modalbody">
+                        <div class="modalcontent">
+                            <table class="form">
+                                <tr>
+                                    <th>IdUrgente</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdUrgente" v-model="newExpediente.idUrgente"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdTipoExpediente</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdTipoExpediente" v-model="newExpediente.idTipoExpediente"></td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>:</th>
+                                    <td><input type="date" placeholder="2018-12-01" v-model="newExpediente.fecha"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdTitular</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdTitular" v-model="newExpediente.idTitular"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdDireccion</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdDireccion" v-model="newExpediente.idDireccion"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdProyectista</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdProyectista" v-model="newExpediente.idProyectista"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdCalificacion</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdCalificacion" v-model="newExpediente.idCalificacion"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdIAE</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdIAE" v-model="newExpediente.idIAE"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdEstado</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdEstado" v-model="newExpediente.idEstado"></td>
+                                </tr>
+                                <tr>
+                                    <th>Descripcion</th>
+                                    <th>:</th>
+                                    <td><input type="text" placeholder="Descripcion" v-model="newExpediente.descripcion"></td>
+                                </tr>
+                            </table>
+                            <div class="margin"></div>
+                            <button class="center"  @click="showingNuevoExpediente = false; creaExpediente();" >Añade Expediente</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Editar expediente -->
+
+                <div class="modal col-md-6" id="addmodal" v-if="showingEditarExpediente">
+                    <div class="modalheading">
+                        <p class="left">Edita expediente</p>
+                        <p class="right close" @click="showingEditarExpediente = false;">x</p>
+                        <div class="fix"></div>
+                    </div>
+                    <div class="modalbody">
+                        <div class="modalcontent">
+                            <table class="form">
+                                <tr>
+                                    <th>IdUrgente</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdUrgente" v-model="clickedExpediente.idUrgente"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdTipoExpediente</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdTipoExpediente" v-model="clickedExpediente.idTipoExpediente"></td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>:</th>
+                                    <td><input type="date" placeholder="2001-01-01" v-model="clickedExpediente.fecha"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdTitular</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdTitular" v-model="clickedExpediente.idTitular"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdDireccion</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdDireccion" v-model="clickedExpediente.idDireccion"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdProyectista</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdProyectista" v-model="clickedExpediente.idProyectista"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdCalificacion</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdCalificacion" v-model="clickedExpediente.idCalificacion"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdIAE</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdIAE" v-model="clickedExpediente.idIAE"></td>
+                                </tr>
+                                <tr>
+                                    <th>IdEstado</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdEstado" v-model="clickedExpediente.idEstado"></td>
+                                </tr>
+                                <tr>
+                                    <th>Descripcion</th>
+                                    <th>:</th>
+                                    <td><input type="text" placeholder="Descripcion" v-model="clickedExpediente.descripcion"></td>
+                                </tr>
+                            </table>
+                            <div class="margin"></div>
+                            <button class="center"  @click="showingEditarExpediente = false; updateExpediente();" >Actualiza Expediente</button>
+                            <div class="fix"></div>
+                        </div>
+                    </div>
+                </div>
 
 
-</body>
+                <div class="modal col-md-6" id="deleteExpediente" v-if="showingDeleteExpediente">
+                    <div class="modalheading">
+                        <p class="left">Eliminar Expediente</p>
+                        <p class="right close" @click="showingDeleteExpediente = false;">x</p>
+                        <div class="fix"></div>
+                    </div>
+                    <div class="modalbody">
+                        <div class="modalcontent">
+
+                            <div class="margin"></div>
+                            <h3 class="center">Are you sure to Delete?</h3>
+                            <div class="margin"></div>
+                            <h4 class="center">{{clickedExpediente.numero}}</h4>
+                            <div class="margin"></div>
+                            <div class="col-md-6 center">
+                                <button class="left" @click="showingDeleteExpediente = false; deleteExpediente()">YES</button>
+                                <button class="right" @click="showingDeleteExpediente = false;">NO</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js"></script>
+        <script type="text/javascript" src="js/app.js"></script>
+
+
+    </body>
 </html>

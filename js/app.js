@@ -2,16 +2,17 @@ var app = new Vue({
 
 	el: "#root",
 	data: {
-		showingModal:false,
-		showingeditModal: false,
-		showingdeleteModal: false,
+		showingNuevoExpediente:false,
+		showingEditarExpediente: false,
+		showingDeleteExpediente: false,
 		errorMessage : "",
 		successMessage : "",
 		users: [],
 		newUser: {email: "", mobile: ""},
 		expedientes: [],
-		newExpediente: {username: "", email: "", mobile: ""},
+		newExpediente: {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular:0, idDireccion:0, idProyectista:0,idCalificacion:0, idIAE:0, descripcion: ""},
 		clickedUser: {},
+		clickedExpediente: {},
 
 	},
 	mounted: function () {
@@ -30,6 +31,57 @@ var app = new Vue({
 			}
 		});
 	},
+	creaExpediente:function(){
+
+		var formData = app.toFormData(app.newExpediente);
+		axios.post("http://localhost/expedientes/php/api.php?action=creaExpediente", formData)
+			.then(function(response){
+				console.log(response);
+				app.newExpediente = {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular:0, idDireccion:0, idProyectista:0,idCalificacion:0, idIAE:0, descripcion: ""};
+				if (response.data.error) {
+					app.errorMessage = response.data.message;
+
+				}else{
+					app.successMessage = response.data.message;
+					app.getAllExpedientes();
+				}
+			});
+		},
+		updateExpediente:function(){
+
+		var formData = app.toFormData(app.clickedExpediente);
+		axios.post("http://localhost/expedientes/php/api.php?action=updateExpediente", formData)
+			.then(function(response){
+				console.log(response);
+				app.clickedExpediente = {};
+				if (response.data.error) {
+					app.errorMessage = response.data.message;
+				}else{
+					app.successMessage = response.data.message;
+					app.getAllExpedientes();
+				}
+			});
+		},
+		selectExpediente(expediente){
+			app.clickedExpediente = expediente;
+		},
+		deleteExpediente:function(){
+
+		var formData = app.toFormData(app.clickedExpediente);
+		axios.post("http://localhost/expedientes/php/api.php?action=deleteExpediente", formData)
+			.then(function(response){
+				console.log(response);
+				app.clickedExpediente = {};
+				if (response.data.error) {
+					app.errorMessage = response.data.message;
+				}else{
+					app.successMessage = response.data.message;
+					app.getAllExpedientes();
+				}
+			});
+		}
+
+		,
 		getAllUsers: function(){
 			axios.get("http://localhost/vueCRUD/api.php?action=read")
 			.then(function(response){

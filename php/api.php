@@ -24,56 +24,66 @@ if ($action == 'read') {
 	$res['expedientes'] = $expedientes;
 }
 
-if ($action == 'create') {
+if ($action == 'creaExpediente') {
 
-	$username = $_POST['username'];
-	$email = $_POST['email'];
-	$mobile = $_POST['mobile'];
+	$idUrgente = $_POST['idUrgente'];
+	$idTipoExpediente = $_POST['idTipoExpediente'];
+	$fecha = $_POST['fecha'];
+	$idTitular = $_POST['idTitular'];
+	$idDireccion = $_POST['idDireccion'];
+	$idProyectista = $_POST['idProyectista'];
+	$idCalificacion = $_POST['idCalificacion'];
+	$idIAE = $_POST['idIAE'];
+	$idEstado = $_POST['idEstado'];
+	$descripcion = $_POST['descripcion'];
 
 
-	$result = $conn->query("INSERT INTO `users` (`username`, `email`, `mobile`) VALUES ('$username', '$email', '$mobile') ");
+	$result = $conn->query("INSERT INTO `expediente` (`id`, `idUrgente`, `idTipoExpediente`, `fecha`, `numero`, `idTitular`, `idDireccion`, `idProyectista`, `idCalificacion`, `idIAE`, `idEstado`, `descripcion`)
+													VALUES (null,$idUrgente, $idTipoExpediente, '$fecha', null, $idTitular,$idDireccion, $idProyectista,$idCalificacion,$idIAE,$idEstado,'$descripcion')");
 	if ($result) {
-		$res['message'] = "User Added successfully";
+		$res['message'] = "Expediente añadido con éxito";
 	} else{
 		$res['error'] = true;
-		$res['message'] = "Insert User fail";
+		$res['message'] = "La inserción ha fallado";
 	}
 }
 
 
-if ($action == 'update') {
+if ($action == 'updateExpediente') {
 	$id = $_POST['id'];
-	$username = $_POST['username'];
-	$email = $_POST['email'];
-	$mobile = $_POST['mobile'];
+	$idUrgente = $_POST['idUrgente'];
+	$idTipoExpediente = $_POST['idTipoExpediente'];
+	$fecha = $_POST['fecha'];
+	$numero = $_POST['numero'];
+	$idTitular = $_POST['idTitular'];
+	$idDireccion = $_POST['idDireccion'];
+	$idProyectista = $_POST['idProyectista'];
+	$idCalificacion = $_POST['idCalificacion'];
+	$idIAE = $_POST['idIAE'];
+	$idEstado = $_POST['idEstado'];
+	$descripcion = $_POST['descripcion'];
 
 
-	$result = $conn->query("UPDATE `users` SET `username` = '$username', `email` = '$email', `mobile` = '$mobile'WHERE `id` = '$id'");
+	$result = $conn->query("UPDATE `expediente` SET `idUrgente`=$idUrgente,`idTipoExpediente`=$idTipoExpediente,`fecha`='$fecha',`numero`='$numero',`idTitular`=$idTitular,`idDireccion`=$idDireccion,`idProyectista`=$idProyectista,`idCalificacion`=$idCalificacion,`idIAE`=$idIAE,`idEstado`=$idEstado,`descripcion`='$descripcion' WHERE `id`=$id");
 	if ($result) {
-		$res['message'] = "User Updated successfully";
+		$res['message'] = "Expediente Actualizado correctamente";
 	} else{
 		$res['error'] = true;
-		$res['message'] = "User Update failed";
+		$res['message'] = "La actualización del expediente ha fallado";
 	}
 }
 
 
-
-
-
-if ($action == 'delete') {
+if ($action == 'deleteExpediente') {
 	$id = $_POST['id'];
-	$username = $_POST['username'];
-	$email = $_POST['email'];
-	$mobile = $_POST['mobile'];
 
 
-	$result = $conn->query("DELETE FROM `users` WHERE `id` = '$id'");
+	$result = $conn->query("DELETE FROM `expediente` WHERE `id` = $id");
 	if ($result) {
-		$res['message'] = "User deleted successfully";
+		$res['message'] = "Expediente eliminado";
 	} else{
 		$res['error'] = true;
-		$res['message'] = "User delete failed";
+		$res['message'] = "La eliminación del expediente ha fallado";
 	}
 }
 
