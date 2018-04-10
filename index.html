@@ -15,7 +15,10 @@
             <div class="">
                 <div class="crud_header">
                     <h1 class="left">EXPEDIENTES</h1>
-                    <button class="right addnew" @click="showingModal = true;">Login</button>
+
+              
+
+                    <button class="right addnew" @click="showingLogin = true;">Login</button>
                     <button class="right addnew" @click="showingNuevoExpediente = true;">Nuevo Expediente</button>
                     <div class="fix"></div>
                 </div>
@@ -56,6 +59,34 @@
                         <td><button @click="showingDeleteExpediente = true; selectExpediente(expediente)" >Eliminar</button></td>
                     </tr>
                 </table>
+
+
+                <!--Loguearse -->
+                <div class="modal col-md-6" id="login" v-if="showingLogin">
+                    <div class="modalheading">
+                        <p class="left">Login</p>
+                        <p class="right close" @click="showingLogin = false;">x</p>
+                        <div class="fix"></div>
+                    </div>
+                    <div class="modalbody">
+                        <div class="modalcontent">
+                            <table class="form">
+                                <tr>
+                                    <th>Email</th>
+                                    <th>:</th>
+                                    <td><input type="email" placeholder="Email" v-model="clickedLogin.email"></td>
+                                </tr>
+                                <tr>
+                                    <th>Contraseña</th>
+                                    <th>:</th>
+                                    <td><input type="password" placeholder="Password"  v-model="clickedLogin.contraseña"></td>
+                                </tr>
+                            </table>
+                            <div class="margin"></div>
+                            <button class="center"  @click="showinLogin = false; comprobarLogin()">Enviar</button>
+                        </div>
+                    </div>
+                </div>
 
                 <!--Añadir nuevo expediente -->
 
@@ -194,7 +225,7 @@
                     </div>
                 </div>
 
-
+                <!-- Eliminar expediente -->
                 <div class="modal col-md-6" id="deleteExpediente" v-if="showingDeleteExpediente">
                     <div class="modalheading">
                         <p class="left">Eliminar Expediente</p>
