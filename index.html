@@ -15,10 +15,9 @@
             <div class="">
                 <div class="crud_header">
                     <h1 class="left">EXPEDIENTES</h1>
-
-              
-
+                    
                     <button class="right addnew" @click="showingLogin = true;">Login</button>
+                    <button class="right addnew" @click="showingRegistrarse = true;">Registrarse</button>
                     <button class="right addnew" @click="showingNuevoExpediente = true;">Nuevo Expediente</button>
                     <div class="fix"></div>
                 </div>
@@ -40,8 +39,8 @@
                         <th>IdCalificacion</th>
                         <th>IdIAE</th>
                         <th>IdEstado</th>
-                        <th>Descripcion</th-->
-                            </tr-->
+                        <th>Descripcion</th>
+                    </tr>
                     <tr v-for="expediente in expedientes">
                         <td>{{expediente.id}}</td>
                         <td>{{expediente.idUrgente}}</td>
@@ -60,7 +59,45 @@
                     </tr>
                 </table>
 
-
+                <!--Registrarse-->
+                <div class="modalheight col-md-6" id="registrarse" v-if="showingRegistrarse">
+                    <div class="modalheading">
+                        <p class="left">Nuevo Registro</p>
+                        <p class="right close" @click="showingRegistrarse = false;">x</p>
+                        <div class="fix"></div>
+                    </div>
+                    <div class="modalbody">
+                        <div class="modalcontentregistro">
+                            <table class="form">
+                                <tr>
+                                    <th>Pais</th>
+                                    <th>:</th>
+                                    <td>
+                                        <select >
+                                            <option v-for="pais in paises" v-model="clickedRegistrarse.pais" value="{{pais.id}}" @click="getProvincias()">{{pais.pais}}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                 <tr>
+                                    <th>Provincia</th>
+                                    <th>:</th>
+                                    <td>
+                                        <select>
+                                            <option v-for="provincia in provincias" v-model="clickedRegistrarse.provincia" value="{{provincia.id}}">{{provincia.provincia}}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>IdUrgente</th>
+                                    <th>:</th>
+                                    <td><input type="number" placeholder="IdUrgente" v-model="clickedExpediente.idUrgente"></td>
+                                </tr>
+                            </table>
+                            <div class="margin"></div>
+                            <button class="center"  @click="showingRegistrarse = false; registrarse()">Enviar</button>
+                        </div>
+                    </div>
+                </div>
                 <!--Loguearse -->
                 <div class="modal col-md-6" id="login" v-if="showingLogin">
                     <div class="modalheading">
@@ -74,23 +111,23 @@
                                 <tr>
                                     <th>Email</th>
                                     <th>:</th>
-                                    <td><input type="email" placeholder="Email" v-model="clickedLogin.email"></td>
+                                    <td><input type="email" placeholder="Email" v-model="login.email"></td>
                                 </tr>
                                 <tr>
                                     <th>Contraseña</th>
                                     <th>:</th>
-                                    <td><input type="password" placeholder="Password"  v-model="clickedLogin.contraseña"></td>
+                                    <td><input type="password" placeholder="Password"  v-model="login.contraseña"></td>
                                 </tr>
                             </table>
                             <div class="margin"></div>
-                            <button class="center"  @click="showinLogin = false; comprobarLogin()">Enviar</button>
+                            <button class="center"  @click="showingLogin = false; comprobarLogin()">Enviar</button>
                         </div>
                     </div>
                 </div>
 
                 <!--Añadir nuevo expediente -->
 
-                <div class="modal col-md-6" id="addmodal" v-if="showingNuevoExpediente">
+                <div class="modalheight col-md-6" id="addmodal" v-if="showingNuevoExpediente">
                     <div class="modalheading">
                         <p class="left">Añade nuevo expediente</p>
                         <p class="right close" @click="showingNuevoExpediente = false;">x</p>
