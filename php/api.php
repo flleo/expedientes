@@ -6,11 +6,12 @@ if ($conn->connect_error)
     die("Database connection established Failed..");
 $res = array('error' => false);
 
-if (isset($_GET['action']))    $action = $_GET['action'];
+if (isset($_GET['action']))
+    $action = $_GET['action'];
 
 //Registrarse//////////////////////////////////////////////
 if ($action == 'registrarse') {
-   /* $id = $_POST['id'];
+    $id = $_POST['id'];
     $idUrgente = $_POST['idUrgente'];
     $idTipoExpediente = $_POST['idTipoExpediente'];
     $fecha = $_POST['fecha'];
@@ -31,8 +32,6 @@ if ($action == 'registrarse') {
         $res['error'] = true;
         $res['message'] = "La actualización del expediente ha fallado";
     }
-    * 
-    */
 }
 if ($action == 'mostrarPaises') {
     $result = $conn->query("SELECT * FROM `pais`");
@@ -44,7 +43,7 @@ if ($action == 'mostrarPaises') {
     $res['paises'] = $paises;
 }
 if ($action == 'mostrarProvincias') {
-    $id=$_POST['id'];
+    $id = $_POST['id'];
     $result = $conn->query("SELECT * FROM `provincia` WHERE idPais = $id");
     $provincias = array();
 
@@ -52,6 +51,42 @@ if ($action == 'mostrarProvincias') {
         array_push($provincias, $row);
     }
     $res['provincias'] = $provincias;
+}
+if ($action == 'mostrarMunicipios') {
+    $id = $_POST['id'];
+    $result = $conn->query("SELECT * FROM `municipio` WHERE idProvincia =  $id");
+    $municipios = array();
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($municipios, $row);
+    }
+    $res['municipios'] = $municipios;
+}
+if ($action == 'mostrarLocalidades') {
+    $id = $_POST['id'];
+    $result = $conn->query("SELECT * FROM `localidad` WHERE idProvincia =  $id");
+    $localidades = array();
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($localidades, $row);
+    }
+    $res['localidades'] = $localidades;
+}
+if ($action == 'añadirDireccion') {
+    $idPais = $_POST['idPais'];
+    $idProvincia = $_POST['idProvincia'];
+    $idMunicipio = $_POST['idMunicipio'];
+    $idLocalidad = $_POST['idLocalidad'];
+    $codPostal = $_POST['codPostal'];
+    $direccion = $_POST['direccion'];
+
+    $result = $conn->query("INSERT INTO `direccion`(`id`, `idPais`, `idProvincia`, `idMunicipio`, `idLocalidad`, `codPostal`, `direccion`) 	        VALUES (null,$idPais, $idProvincia, $idMunicipio, $idLocalidad, '$codPostal','$direccion')");
+    if ($result) {
+        $res['message'] = "Direccion añadida con éxito";
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La inserción Direccion ha fallado";
+    }
 }
 
 //Login/////////////////////////////////////////////////////
@@ -62,7 +97,7 @@ if ($action == 'comprobarLogin') {
     $result = $conn->query("SELECT * FROM `usuario` WHERE email like '$email' AND contraseña like '$contraseña'");
 
     $res['usuario'] = $result->fetch_assoc();
-    if ($res['usuario']!=null) {
+    if ($res['usuario'] != null) {
         $res['message'] = "Usuario logueado con éxito";
     } else {
         $res['error'] = true;

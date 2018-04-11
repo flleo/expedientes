@@ -15,9 +15,9 @@
             <div class="">
                 <div class="crud_header">
                     <h1 class="left">EXPEDIENTES</h1>
-                    
+
                     <button class="right addnew" @click="showingLogin = true;">Login</button>
-                    <button class="right addnew" @click="showingRegistrarse = true;">Registrarse</button>
+                    <button class="right addnew" @click="showingDireccion = true;">Registrarse</button>
                     <button class="right addnew" @click="showingNuevoExpediente = true;">Nuevo Expediente</button>
                     <div class="fix"></div>
                 </div>
@@ -60,10 +60,10 @@
                 </table>
 
                 <!--Registrarse-->
-                <div class="modalheight col-md-6" id="registrarse" v-if="showingRegistrarse">
+                <div class="modalheight col-md-6" id="direccion" v-if="showingDireccion">
                     <div class="modalheading">
-                        <p class="left">Nuevo Registro</p>
-                        <p class="right close" @click="showingRegistrarse = false;">x</p>
+                        <p class="left">Añade Dirección</p>
+                        <p class="right close" @click="showingDireccion = false;">x</p>
                         <div class="fix"></div>
                     </div>
                     <div class="modalbody">
@@ -73,28 +73,118 @@
                                     <th>Pais</th>
                                     <th>:</th>
                                     <td>
+                                        <!--select2 :options="paises" v-model="pais" @input="getProvincias"></select2-->
                                         <select >
-                                            <option v-for="pais in paises" v-model="clickedRegistrarse.pais" value="{{pais.id}}" @click="getProvincias()">{{pais.pais}}</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                 <tr>
-                                    <th>Provincia</th>
-                                    <th>:</th>
-                                    <td>
-                                        <select>
-                                            <option v-for="provincia in provincias" v-model="clickedRegistrarse.provincia" value="{{provincia.id}}">{{provincia.provincia}}</option>
+                                            <option v-for="p in paises"  @click="getProvincias(p)"   >{{p.pais}}</option>
                                         </select>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>IdUrgente</th>
+                                    <th>Provincia</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdUrgente" v-model="clickedExpediente.idUrgente"></td>
+                                    <td>
+                                        <select >
+                                            <option v-for="p in provincias" @click="getMunicipios(p);getLocalidades(p)" >{{p.provincia}}</option>
+                                        </select>
+                                    </td>
                                 </tr>
+                                <tr>
+                                    <th>Municipio</th>
+                                    <th>:</th>
+                                    <td>
+                                        <select >
+                                            <option v-for="municipio in municipios" @click="setMunicipio(m)" >{{municipio.municipio}}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Localidad</th>
+                                    <th>:</th>
+                                    <td>
+                                        <select >
+                                            <option v-for="l in localidades" @click="setLocalidad(l)" >{{l.localidad}}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Cod. Postal</th>
+                                    <th>:</th>
+                                    <td>
+                                        <input v-model="direccion.codPostal"></input>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Dirección</th>
+                                    <th>:</th>
+                                    <td>
+                                        <input v-model="direccion.direccion"></input>
+                                    </td>
+                                </tr>
+                                
                             </table>
                             <div class="margin"></div>
-                            <button class="center"  @click="showingRegistrarse = false; registrarse()">Enviar</button>
+                            <button class="center"  @click="showingDireccion = false; añadirDireccion();">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+                <!--Persona -->
+                <div class="modalheight col-md-6" id="persona" v-if="showingPersona">
+                    <div class="modalheading">
+                        <p class="left">Datos Personales</p>
+                        <p class="right close" @click="showingPersona = false;">x</p>
+                        <div class="fix"></div>
+                    </div>
+                    <div class="modalbody">
+                        <div class="modalcontentregistro">
+                            <table class="form">
+                                <tr>
+                                    <th>Dni</th>
+                                    <th>:</th>
+                                    <td>
+                                         <input v-model="persona.dni"></input>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>:</th>
+                                    <td>
+                                         <input v-model="persona.nombre"></input>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Direccion</th>
+                                    <th>:</th>
+                                    <td>
+                                        <input >{{direccion.direccion}}</input>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Localidad</th>
+                                    <th>:</th>
+                                    <td>
+                                        <select >
+                                            <option v-for="l in localidades" @click="setLocalidad(l)" >{{l.localidad}}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Cod. Postal</th>
+                                    <th>:</th>
+                                    <td>
+                                        <input v-model="direccion.codPostal"></input>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Dirección</th>
+                                    <th>:</th>
+                                    <td>
+                                        <input v-model="direccion.direccion"></input>
+                                    </td>
+                                </tr>
+                                
+                            </table>
+                            <div class="margin"></div>
+                            <button class="center"  @click="showingDireccion = false; añadirDireccion();">Enviar</button>
                         </div>
                     </div>
                 </div>
