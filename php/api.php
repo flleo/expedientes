@@ -80,13 +80,71 @@ if ($action == 'añadirDireccion') {
     $codPostal = $_POST['codPostal'];
     $direccion = $_POST['direccion'];
 
-    $result = $conn->query("INSERT INTO `direccion`(`id`, `idPais`, `idProvincia`, `idMunicipio`, `idLocalidad`, `codPostal`, `direccion`) 	        VALUES (null,$idPais, $idProvincia, $idMunicipio, $idLocalidad, '$codPostal','$direccion')");
+    $result = $conn->query("INSERT INTO `direccion`(`id`, `idPais`, `idProvincia`, `idMunicipio`, `idLocalidad`, `codPostal`, `direccion`) VALUES (null,$idPais, $idProvincia, $idMunicipio, $idLocalidad, '$codPostal','$direccion')");
     if ($result) {
         $res['message'] = "Direccion añadida con éxito";
+        $res['insert_id'] = $conn->insert_id;
     } else {
         $res['error'] = true;
         $res['message'] = "La inserción Direccion ha fallado";
     }
+}
+
+if ($action == 'añadirPersona') {
+    $dni = $_POST['dni'];
+    $nombre = $_POST['nombre'];
+    $idDireccion = $_POST['idDireccion'];
+    $email = $_POST['email'];
+    $telefono = $_POST['telefono'];
+
+    $ok = comprobarDni($dni);
+
+    if ($ok[0] == 0 && $ok[1] == 0) {
+        $res['error'] = true;
+        $res['message'] = "Formato dni incorrecto".$ok[0]." ".$ok[1];
+    } else if ($ok[0] == 8) {
+        $res['error'] = true;
+        $res['message'] = "La parte numérica dni incorrecto";
+    } else if ($ok[1] == 8) {
+        $res['error'] = true;
+        $res['message'] = "La letra del dni está incorrecta";
+    } else {
+        $result = $conn->query("INSERT INTO `persona`(`id`, `dni`, `nombre`, `idDireccion`, `email`, `telefono`) VALUES  (null,'$dni','$nombre',$idDireccion, '$email', '$telefono')");
+        if ($result) {
+            $res['message'] = "Persona añadida con éxito".$ok[0]." ".$ok[1];
+        } else {
+            $res['error'] = true;
+            $res['message'] = "La inserción Persona ha fallado";
+        }
+    }
+}
+
+function comprobarDni($nif) {
+    
+    $ok = array($num, $let);
+    $partes = explode('-', $nif);
+
+    $numerosP = $partes[0];
+
+    $numeros = substr($numerosP, -10, 2) . substr($numerosP, -7, 3) . substr($numerosP, -3, 3);
+    if (is_numeric($numeros)) {
+
+        $letra = strtoupper($partes[1]);
+
+        if (substr("TRWAGMYFPDXBNJZSQVHLCKE", $numeros % 23, 1) == $letra) {
+            if (substr($numerosP, -8, 1) === '.' && substr($numerosP, -4, 1) === '.') {
+                $ok[0] = 1;$ok[1]=1;
+            } else {
+                $ok[0] = 0;
+            }
+        } else {
+            $ok[1] = 8;
+        }
+    } else {
+        $ok[0] = 8;
+        $ok[1] = 0;
+    }
+    return $ok;
 }
 
 //Login/////////////////////////////////////////////////////
@@ -104,7 +162,6 @@ if ($action == 'comprobarLogin') {
         $res['message'] = "Login fallido";
     }
 }
-
 
 
 //Expedientes//////////////////////////////////////////////////

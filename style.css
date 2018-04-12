@@ -19,6 +19,7 @@ body {
 }
 .right{
     float: right;
+    margin: 5px;
 }
 .fix{
     overflow: hidden;
@@ -60,6 +61,7 @@ table.list th {
 .crud_header {
     background: #e0e0e0;
     padding: 35px 22px 20px 20px;
+   
 }
 table.list tr td{
 
@@ -78,6 +80,18 @@ table.list tr td{
     border-right: 1px solid #fff;
 }
 
+.modal {
+    top: 99px;
+    left:0;
+    right:0;
+    bottom:0;
+    position: fixed;
+    background: #b5b5b5fc;
+    margin: 0 auto;
+    display: block;
+    padding: 0;
+    box-shadow: 0 0 130px 28px #00000073;
+}
 .modalheight {
     top: 99px;
     left:0;
@@ -88,12 +102,11 @@ table.list tr td{
     margin: 0 auto;
     display: block;
     padding: 0;
-    height: 900px;
     box-shadow: 0 0 130px 28px #00000073;
+    height: 900px;
 }
-
-.modal{
-    top: 99px;
+.modalmedium {
+  top: 99px;
     left:0;
     right:0;
     bottom:0;
@@ -102,9 +115,11 @@ table.list tr td{
     margin: 0 auto;
     display: block;
     padding: 0;
-    height: 300px;
     box-shadow: 0 0 130px 28px #00000073;
+    height: 400px;
 }
+
+
 
 .modalheading{
     background: #fff;
@@ -123,6 +138,9 @@ table.form {
     text-align: center;
     border-bottom: 5px solid #b6b6b6;
 }
+.form select{
+    height: 40px 
+}
 .form td{
     text-align: left;
     margin: 0 10px;
@@ -137,10 +155,14 @@ table.form {
 .margin{
     margin: 30px 0;
 }
+.margin_left{
+    display: block;
+    margin-left:  40%;
+}
 .center {
     text-align: center;
     display: block;
-    margin: 0 auto;
+    margin: 5px;
 }
 p.errorMessage {
     background: #ffbaba;
