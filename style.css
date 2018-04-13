@@ -106,7 +106,7 @@ table.list tr td{
     height: 900px;
 }
 .modalmedium {
-  top: 99px;
+    top: 99px;
     left:0;
     right:0;
     bottom:0;
@@ -139,7 +139,8 @@ table.form {
     border-bottom: 5px solid #b6b6b6;
 }
 .form select{
-    height: 40px 
+    height: 40px
+       
 }
 .form td{
     text-align: left;
@@ -158,6 +159,11 @@ table.form {
 .margin_left{
     display: block;
     margin-left:  40%;
+}
+.margin_left_login{
+    display: block;
+    margin-left:  40%;
+    height: 100px;
 }
 .center {
     text-align: center;

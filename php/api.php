@@ -9,6 +9,33 @@ $res = array('error' => false);
 if (isset($_GET['action']))
     $action = $_GET['action'];
 
+
+//Login/////////////////////////////////////////////////////
+if ($action == 'comprobarLogin') {
+    $usuario = $_POST['usuario'];
+    $contraseña = $_POST['contraseña'];
+
+    $result = $conn->query("SELECT * FROM `usuario` WHERE usuario like '$usuario' AND contraseña like '$contraseña'");
+    $res['usuario'] = $result->fetch_assoc();
+    if ($res['usuario'] != null) {
+        $res['message'] = "Usuario logueado con éxito";
+        
+    } else {
+        $res['error'] = true;
+        $res['message'] = "Login fallido";
+    }
+}
+
+//Tipo Usuario//////////////////////////////////////
+if ($action == 'mostrarTipoUsuarios') {
+    $result = $conn->query("SELECT * FROM `tipoUsuario`");
+    $tipoUsuarios = array();
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($tipoUsuarios, $row);
+    }
+    $res['tipoUsuarios'] = $tipoUsuarios;
+}
 //Registrarse//////////////////////////////////////////////
 if ($action == 'registrarse') {
     $id = $_POST['id'];
@@ -112,10 +139,29 @@ if ($action == 'añadirPersona') {
         $result = $conn->query("INSERT INTO `persona`(`id`, `dni`, `nombre`, `idDireccion`, `email`, `telefono`) VALUES  (null,'$dni','$nombre',$idDireccion, '$email', '$telefono')");
         if ($result) {
             $res['message'] = "Persona añadida con éxito".$ok[0]." ".$ok[1];
+            $res['id'] = $conn->insert_id;
         } else {
             $res['error'] = true;
             $res['message'] = "La inserción Persona ha fallado";
         }
+    }
+}
+
+//Usuario//////////////////////////////////////////////
+if ($action == 'grabarUsuario') {
+    $id=$_POST['id'];
+    $idPersona=$_POST['idPersona'];
+    $idTipoUsuario=$_POST['idTipoUsuario'];
+    $usuario=$_POST['usuario'];
+    $contraseña=$_POST['contraseña'];
+
+    $result = $conn->query("INSERT INTO `usuario`(`id`, `idPersona`, `idTipoUsuario`, `usuario`, `contraseña`) VALUES (null,$idPersona, $idTipoUsuario, '$usuario','$contraseña')");
+    if ($result) {
+        $res['message'] = "Usuario añadido con éxito";
+        $res['id'] = $conn->insert_id;
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La inserción Usuario ha fallado";
     }
 }
 
@@ -147,24 +193,19 @@ function comprobarDni($nif) {
     return $ok;
 }
 
-//Login/////////////////////////////////////////////////////
-if ($action == 'comprobarLogin') {
-    $email = $_POST['email'];
-    $contraseña = $_POST['contraseña'];
-
-    $result = $conn->query("SELECT * FROM `usuario` WHERE email like '$email' AND contraseña like '$contraseña'");
-
-    $res['usuario'] = $result->fetch_assoc();
-    if ($res['usuario'] != null) {
-        $res['message'] = "Usuario logueado con éxito";
-    } else {
-        $res['error'] = true;
-        $res['message'] = "Login fallido";
-    }
-}
 
 
 //Expedientes//////////////////////////////////////////////////
+
+if ($action == 'mostrarExpedientesTecnico') {
+    $result = $conn->query("SELECT * FROM `expediente` JOIN calificacion  ON calificacion.idExpediente=expediente.id JOIN usuario ON usuario.id=calificacion.idTecnico ");
+    $expedientes = array();
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($expedientes, $row);
+    }
+    $res['expedientes'] = $expedientes;
+}
 if ($action == 'mostrarExpedientes') {
     $result = $conn->query("SELECT * FROM `expediente`");
     $expedientes = array();

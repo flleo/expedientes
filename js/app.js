@@ -1,7 +1,21 @@
+
+
 var app = new Vue({
 
     el: "#root",
+    created: function () {
+        console.log("Expedientes");
+        this.getAllExpedientes();
+        this.getAllPaises();
+        this.getAllTipoUsuarios();
+        
+    },
     data: {
+        showingTecnico: false,
+        showingAdministrador: false,
+        showingAdministrativo: false,
+        showingNoLogueado: true,
+        showingUsuario: false,
         showingPersona: false,
         showingDireccion: false,
         showingRegistrarse: false,
@@ -12,8 +26,6 @@ var app = new Vue({
         errorMessage: "",
         successMessage: "",
         usuario: "",
-        /* users: [],
-         newUser: {email: "", mobile: ""},*/
         selectedPais: "España",
         selectedProvincia: "Santa Cruz de Tenerife",
         expedientes: [],
@@ -21,6 +33,7 @@ var app = new Vue({
         provincias: [],
         municipios: [],
         localidades: [],
+        tipoUsuarios: [],
         persona: {id:0,dni:"",nombre:"",idDireccion:0,email:"",telefono:""},
         pais:{id:0,pais:"España"},
         provincia:{id:0,idPais:0,provincia:""},
@@ -28,19 +41,14 @@ var app = new Vue({
         localidad:{id:0,idMunicipio:0,localidad:""},
         direccion: {id:0,idPais:0,idProvincia:0,idMunicipio:0,idLocalidad:0,codPostal:"",direccion:""},
         newExpediente: {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular: 0, idDireccion: 0, idProyectista: 0, idCalificacion: 0, idIAE: 0, descripcion: ""},
-        login: {email: "", contraseña: ""},
-        //clickedUser: {},
-        clickedExpediente: {},
+        login: {usuario: "", contraseña: ""},
+        usuario: {id:0,idPersona:0,idTipoUsuario:0,usuario:"",contraseña:""},
+        tipoUsuario: {id:0,tipo:""},
+        expediente: {},
         clickedRegistrarse: {},
 
     },
-    created: function () {
-        console.log("Expedientes");
-        this.getAllExpedientes();
-        this.getAllPaises();
-
-
-    },
+    
     /* watch: {
      paises: function (newVal) {
      this.getProvincias(newVal);
@@ -48,6 +56,68 @@ var app = new Vue({
      },
      */
     methods: {
+         //Login//////////////////////////////////////
+        comprobarLogin: function () { 
+            var formData = app.toFormData(app.login);
+            axios.post("http://localhost/expedientes/php/api.php?action=comprobarLogin", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+
+                        } else {
+                            app.successMessage = response.data.message;
+                            app.showingNoLogueado = false;
+                            app.login = {usuario:"",contraseña:""};
+                            app.usuario = response.data.usuario;
+                            app.sesionTipoUsuario();
+                        }
+                    });
+        },
+        //Tipo Usuario/////
+        getAllTipoUsuarios: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarTipoUsuarios")
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.tipoUsuarios = response.data.tipoUsuarios;
+                        }
+                    });
+        },
+        setIdTipoUsuario(id){
+            app.usuario.idTipoUsuario = id;
+        },
+        //Sesion/////////////////
+        sesionTipoUsuario: function () {
+         console.log("chacho",app.usuario.idTipoUsuario);
+         if(app.usuario.idTipoUsuario==3) app.showingAdministrativo = true;
+         if(app.usuario.idTipoUsuario==2) app.showingAdministrador = true;
+         if(app.usuario.idTipoUsuario==1) {
+             app.showingTecnico = true;
+             
+         }
+        
+        },
+        //Usuario/////////////
+        grabarUsuario: function () {
+            app.usuario.idPersona = app.persona.id;
+            console.log(app.usuario.id,app.usuario.idPersona,app.usuario.idTipoUsuario,app.usuario.usuario,app.usuario.contraseña);
+            var formData = app.toFormData(app.usuario);
+            axios.post("http://localhost/expedientes/php/api.php?action=grabarUsuario", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.successMessage = response.data.message;
+                            app.usuario = response.data.usuario;
+                            app.sesionTipoUsuario();
+                            app.showingUsuario = false;
+                        }
+                    });
+        },
         //Registrarse//////////
         //Direccion/////
         registrarse: function () {
@@ -143,8 +213,7 @@ var app = new Vue({
               //      app.showingPersona = true;
         },
         //Persona///////////
-        añadirPersona: function () {
-           
+        añadirPersona: function () {           
             app.persona.idDireccion = app.direccion.id;
              console.log(app.persona.email,app.persona.dni,app.persona.idDireccion,app.persona.nombre,app.persona.telefono);
             var formData = app.toFormData(app.persona);
@@ -156,29 +225,25 @@ var app = new Vue({
                             app.showingPersona = true;
                         } else {
                             app.successMessage = response.data.message;
-                            
+                            app.persona.id = response.data.id;
+                            app.showingUsuario = true;
                             
                         }
                     });
         },
-        //Login//////////////////////////////////////
-        comprobarLogin: function () {
-            app.login = {email: "popo@popo", contraseña: "popo"};
-            var formData = app.toFormData(app.login);
-            axios.post("http://localhost/expedientes/php/api.php?action=comprobarLogin", formData)
+       
+        //Expedientes///////////////
+        getExpedientesTecnico: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarExpedientesTecnico",app.usuario)
                     .then(function (response) {
                         console.log(response);
-                        app.login = {email: "", contraseña: ""};
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
-
                         } else {
-                            app.successMessage = response.data.message;
-
+                            app.expedientes = response.data.expedientes;
                         }
                     });
-        },
-        //Expedientes///////////////
+        } ,
         getAllExpedientes: function () {
             axios.get("http://localhost/expedientes/php/api.php?action=mostrarExpedientes")
                     .then(function (response) {
@@ -208,11 +273,11 @@ var app = new Vue({
         },
         updateExpediente: function () {
 
-            var formData = app.toFormData(app.clickedExpediente);
+            var formData = app.toFormData(app.expediente);
             axios.post("http://localhost/expedientes/php/api.php?action=updateExpediente", formData)
                     .then(function (response) {
                         console.log(response);
-                        //app.clickedExpediente = {};
+                        //app.expediente = {};
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
                         } else {
@@ -222,15 +287,15 @@ var app = new Vue({
                     });
         },
         selectExpediente(expediente) {
-            app.clickedExpediente = expediente;
+            app.expediente = expediente;
         },
         deleteExpediente: function () {
 
-            var formData = app.toFormData(app.clickedExpediente);
+            var formData = app.toFormData(app.expediente);
             axios.post("http://localhost/expedientes/php/api.php?action=deleteExpediente", formData)
                     .then(function (response) {
                         console.log(response);
-                        //app.clickedExpediente = {};
+                        //app.expediente = {};
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
                         } else {

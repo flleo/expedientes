@@ -15,10 +15,14 @@
             <div class="">
                 <div class="crud_header">
                     <h1 class="left">EXPEDIENTES</h1>
-
+                    <div v-if="showingNoLogueado">
                     <button class="right addnew" @click="showingLogin = true;">Login</button>
                     <button class="right addnew" @click="showingDireccion = true;">Registrarse</button>
                     <button class="right addnew" @click="showingNuevoExpediente = true;">Nuevo Expediente</button>
+                    </div>
+                    <div v-if="showingAdministrativo">
+                    <button class="right addnew" @click="showingNuevoExpediente = true;">Nuevo Expediente</button>
+                    </div>
                     <div class="fix"></div>
                 </div>
 
@@ -173,7 +177,7 @@
                                     <th>Email</th>
                                     <th>:</th>
                                     <td>
-                                        <input v-model="persona.email" required></input>
+                                        <input type="email" v-model="persona.email" required></input>
                                     </td>
                                 </tr>
                                 <tr>
@@ -189,14 +193,49 @@
                             <table  class="margin_left">
                                 <tr>
                                     <td><button class="center"  @click="showingDireccion = true;showingPersona = false;">Atras</button></td>
-                                    <td><button class="center"  @click="showingPersona = false; añadirPersona();">Enviar</button></td>
+                                    <td><button class="center"  @click="showingPersona = false; añadirPersona();">Grabar</button></td>
+                                    <td><button class="center"  @click="showingPersona = false; showingUsuario = true;">Siguiente</button></td>
                                 </tr>
                             </table>
                         </div>
                     </div>
                 </div>
+                <!--Usuario -->
+                <div class="modalmedium col-md-6" id="login" v-if="showingUsuario">
+                    <div class="modalheading">
+                        <p class="left">Nuevo Usuario</p>
+                        <p class="right close" @click="showingUsuario = false; ">x</p>
+                        <div class="fix"></div>
+                    </div>
+                    <div class="modalbody">
+                        <div class="modalcontent">
+                            <table class="form">
+                                <tr>
+                                    <th>Usuario</th> 
+                                    <th>:</th>
+                                    <td><input type="text" placeholder="Usuario" v-model="usuario.usuario"></td>
+                                    <td><select><option style="font-size-adjust:  8px" v-for="tipo in tipoUsuarios" @click="setIdTipoUsuario(tipo.id)">{{tipo.tipo}}</option></select></td>
+                                </tr>
+                                <tr>
+                                    <th>Contraseña</th>
+                                    <th>:</th>
+                                    <td><input type="password" placeholder="Password"  v-model="usuario.contraseña"></td>
+                                </tr>
+                            </table>
+                            <table  class="margin_left">
+                                <tr>
+                                    <td> <button class="center"  @click="showingUsuario = false; grabarUsuario()">Grabar</button></td>
+                                    <td> <button class="center"  @click="showingUsuario = false; showingDireccion= true">Volver</button></td>
+                                </tr>
+                                
+                            </table>
+                            <div class="margin"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!--Loguearse -->
-                <div class="modal col-md-6" id="login" v-if="showingLogin">
+                <div class="modalmedium col-md-6" id="login" v-if="showingLogin">
                     <div class="modalheading">
                         <p class="left">Login</p>
                         <p class="right close" @click="showingLogin = false;">x</p>
@@ -206,9 +245,9 @@
                         <div class="modalcontent">
                             <table class="form">
                                 <tr>
-                                    <th>Email</th>
+                                    <th>Usuario</th>
                                     <th>:</th>
-                                    <td><input type="email" placeholder="Email" v-model="login.email"></td>
+                                    <td><input type="text" placeholder="Usuario" v-model="login.usuario"></td>
                                 </tr>
                                 <tr>
                                     <th>Contraseña</th>
@@ -216,8 +255,12 @@
                                     <td><input type="password" placeholder="Password"  v-model="login.contraseña"></td>
                                 </tr>
                             </table>
+                            <table  class="margin_left">
+                                <tr>
+                                    <td> <button class="center"  @click="showingLogin = false; comprobarLogin()">Enviar</button></td>
+                                </tr>
+                            </table>
                             <div class="margin"></div>
-                            <button class="center"  @click="showingLogin = false; comprobarLogin()">Enviar</button>
                         </div>
                     </div>
                 </div>
@@ -281,11 +324,15 @@
                                 <tr>
                                     <th>Descripcion</th>
                                     <th>:</th>
-                                    <td><input type="text" placeholder="Descripcion" v-model="newExpediente.descripcion"></td>
+                                    <td><textarea rows="2" cols="50" placeholder="Descripcion" v-model="newExpediente.descripcion"></textarea></td>
                                 </tr>
                             </table>
                             <div class="margin"></div>
-                            <button class="center"  @click="showingNuevoExpediente = false; creaExpediente();" >Añade Expediente</button>
+                            <table  class="margin_left">
+                                <tr>
+                                    <td><button class="center"  @click="showingNuevoExpediente = false; creaExpediente();" >Añade Expediente</button></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -304,52 +351,52 @@
                                 <tr>
                                     <th>IdUrgente</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdUrgente" v-model="clickedExpediente.idUrgente"></td>
+                                    <td><input type="number" placeholder="IdUrgente" v-model="expediente.idUrgente"></td>
                                 </tr>
                                 <tr>
                                     <th>IdTipoExpediente</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdTipoExpediente" v-model="clickedExpediente.idTipoExpediente"></td>
+                                    <td><input type="number" placeholder="IdTipoExpediente" v-model="expediente.idTipoExpediente"></td>
                                 </tr>
                                 <tr>
                                     <th>Fecha</th>
                                     <th>:</th>
-                                    <td><input type="date" placeholder="2001-01-01" v-model="clickedExpediente.fecha"></td>
+                                    <td><input type="date" placeholder="2001-01-01" v-model="expediente.fecha"></td>
                                 </tr>
                                 <tr>
                                     <th>IdTitular</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdTitular" v-model="clickedExpediente.idTitular"></td>
+                                    <td><input type="number" placeholder="IdTitular" v-model="expediente.idTitular"></td>
                                 </tr>
                                 <tr>
                                     <th>IdDireccion</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdDireccion" v-model="clickedExpediente.idDireccion"></td>
+                                    <td><input type="number" placeholder="IdDireccion" v-model="expediente.idDireccion"></td>
                                 </tr>
                                 <tr>
                                     <th>IdProyectista</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdProyectista" v-model="clickedExpediente.idProyectista"></td>
+                                    <td><input type="number" placeholder="IdProyectista" v-model="expediente.idProyectista"></td>
                                 </tr>
                                 <tr>
                                     <th>IdCalificacion</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdCalificacion" v-model="clickedExpediente.idCalificacion"></td>
+                                    <td><input type="number" placeholder="IdCalificacion" v-model="expediente.idCalificacion"></td>
                                 </tr>
                                 <tr>
                                     <th>IdIAE</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdIAE" v-model="clickedExpediente.idIAE"></td>
+                                    <td><input type="number" placeholder="IdIAE" v-model="expediente.idIAE"></td>
                                 </tr>
                                 <tr>
                                     <th>IdEstado</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdEstado" v-model="clickedExpediente.idEstado"></td>
+                                    <td><input type="number" placeholder="IdEstado" v-model="expediente.idEstado"></td>
                                 </tr>
                                 <tr>
                                     <th>Descripcion</th>
                                     <th>:</th>
-                                    <td><input type="text" placeholder="Descripcion" v-model="clickedExpediente.descripcion"></td>
+                                    <td><input type="text" placeholder="Descripcion" v-model="expediente.descripcion"></td>
                                 </tr>
                             </table>
                             <div class="margin"></div>
@@ -372,7 +419,7 @@
                             <div class="margin"></div>
                             <h3 class="center">Are you sure to Delete?</h3>
                             <div class="margin"></div>
-                            <h4 class="center">{{clickedExpediente.numero}}</h4>
+                            <h4 class="center">{{expediente.numero}}</h4>
                             <div class="margin"></div>
                             <div class="col-md-6 center">
                                 <button class="left" @click="showingDeleteExpediente = false; deleteExpediente()">YES</button>
