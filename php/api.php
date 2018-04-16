@@ -99,6 +99,51 @@ if ($action == 'mostrarLocalidades') {
     }
     $res['localidades'] = $localidades;
 }
+if ($action == 'añadirProvincia') {
+    $id = $_POST['id'];
+    $idPais = $_POST['idPais'];
+    $provincia = $_POST['provincia'];
+
+    $result = $conn->query("INSERT INTO `provincia`(`id`, `idPais`, `provincia`) VALUES (null,$idPais, '$provincia')");
+    if ($result) {
+        $res['message'] = "Provincia añadida con éxito";
+        $res['id'] = $conn->insert_id;
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La inserción Provincia ha fallado";
+    }
+}
+
+if ($action == 'añadirMunicipio') {
+    $id = $_POST['id'];
+    $idProvincia = $_POST['idProvincia'];
+    $municipio = $_POST['municipio'];
+
+    $result = $conn->query("INSERT INTO `municipio`(`id`, `idProvincia`, `municipio`) VALUES (null,$idProvincia, '$municipio')");
+    if ($result) {
+        $res['message'] = "Municipio añadido con éxito";
+        $res['id'] = $conn->insert_id;
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La inserción Municipio ha fallado";
+    }
+}
+
+if ($action == 'añadirLocalidad') {
+    $id = $_POST['id'];
+    $idProvincia = $_POST['idProvincia'];
+    $localidad = $_POST['localidad'];
+
+    $result = $conn->query("INSERT INTO `localidad`(`id`, `idProvincia`, `localidad`) VALUES (null,$idProvincia, '$localidad')");
+    if ($result) {
+        $res['message'] = "Localidad añadido con éxito";
+        $res['id'] = $conn->insert_id;
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La inserción Localidad ha fallado";
+    }
+}
+
 if ($action == 'añadirDireccion') {
     $idPais = $_POST['idPais'];
     $idProvincia = $_POST['idProvincia'];
@@ -142,7 +187,7 @@ if ($action == 'añadirPersona') {
             $res['id'] = $conn->insert_id;
         } else {
             $res['error'] = true;
-            $res['message'] = "La inserción Persona ha fallado";
+            $res['message'] = "La inserción Persona ha fallado: El dni o email ya existen";
         }
     }
 }
@@ -198,7 +243,8 @@ function comprobarDni($nif) {
 //Expedientes//////////////////////////////////////////////////
 
 if ($action == 'mostrarExpedientesTecnico') {
-    $result = $conn->query("SELECT * FROM `expediente` JOIN calificacion  ON calificacion.idExpediente=expediente.id JOIN usuario ON usuario.id=calificacion.idTecnico ");
+    $idTecnico= $_POST['id'];
+    $result = $conn->query("SELECT * FROM `expediente` INNER JOIN calificacion  WHERE calificacion.idTecnico=$idTecnico");
     $expedientes = array();
 
     while ($row = $result->fetch_assoc()) {

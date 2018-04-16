@@ -8,7 +8,7 @@ var app = new Vue({
         this.getAllExpedientes();
         this.getAllPaises();
         this.getAllTipoUsuarios();
-        
+
     },
     data: {
         showingTecnico: false,
@@ -23,9 +23,9 @@ var app = new Vue({
         showingNuevoExpediente: false,
         showingEditarExpediente: false,
         showingDeleteExpediente: false,
+        showingExpedientes: true,
         errorMessage: "",
         successMessage: "",
-        usuario: "",
         selectedPais: "España",
         selectedProvincia: "Santa Cruz de Tenerife",
         expedientes: [],
@@ -34,21 +34,23 @@ var app = new Vue({
         municipios: [],
         localidades: [],
         tipoUsuarios: [],
-        persona: {id:0,dni:"",nombre:"",idDireccion:0,email:"",telefono:""},
-        pais:{id:0,pais:"España"},
-        provincia:{id:0,idPais:0,provincia:""},
-        municipio:{id:0,idProvincia:0,municipio:""},
-        localidad:{id:0,idMunicipio:0,localidad:""},
-        direccion: {id:0,idPais:0,idProvincia:0,idMunicipio:0,idLocalidad:0,codPostal:"",direccion:""},
+        persona: {id: 0, dni: "", nombre: "", idDireccion: 0, email: "", telefono: ""},
+        pais: {id: 0, pais: "España"},
+        provincia: {id: 0, idPais: 0, provincia: ""},
+        municipio: {id: 0, idProvincia: 0, municipio: ""},
+        localidad: {id: 0, idProvincia: 0, localidad: ""},
+        direccion: {id: 0, idPais: 0, idProvincia: 0, idMunicipio: 0, idLocalidad: 0, codPostal: "", direccion: ""},
         newExpediente: {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular: 0, idDireccion: 0, idProyectista: 0, idCalificacion: 0, idIAE: 0, descripcion: ""},
         login: {usuario: "", contraseña: ""},
-        usuario: {id:0,idPersona:0,idTipoUsuario:0,usuario:"",contraseña:""},
-        tipoUsuario: {id:0,tipo:""},
+        usuario: {id: 0, idPersona: 0, idTipoUsuario: 0, usuario: "", contraseña: ""},
+        newUsuario:{},
+        usuarioLogueado: {usuario:""},
+        tipoUsuario: {id: 0, tipo: ""},
         expediente: {},
         clickedRegistrarse: {},
 
     },
-    
+
     /* watch: {
      paises: function (newVal) {
      this.getProvincias(newVal);
@@ -56,20 +58,22 @@ var app = new Vue({
      },
      */
     methods: {
-         //Login//////////////////////////////////////
-        comprobarLogin: function () { 
+        //Login//////////////////////////////////////
+        comprobarLogin: function () {
             var formData = app.toFormData(app.login);
+            
             axios.post("http://localhost/expedientes/php/api.php?action=comprobarLogin", formData)
                     .then(function (response) {
                         console.log(response);
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
-
+                            
                         } else {
+                            app.usuarioLogueado.usuario = app.login.usuario;
+                            app.login = {};
+                            app.usuario = response.data.usuario;
                             app.successMessage = response.data.message;
                             app.showingNoLogueado = false;
-                            app.login = {usuario:"",contraseña:""};
-                            app.usuario = response.data.usuario;
                             app.sesionTipoUsuario();
                         }
                     });
@@ -86,31 +90,42 @@ var app = new Vue({
                         }
                     });
         },
-        setIdTipoUsuario(id){
-            app.usuario.idTipoUsuario = id;
+        setIdTipoUsuario(id) {
+            app.newUsuario.idTipoUsuario = id;
         },
         //Sesion/////////////////
         sesionTipoUsuario: function () {
-         console.log("chacho",app.usuario.idTipoUsuario);
-         if(app.usuario.idTipoUsuario==3) app.showingAdministrativo = true;
-         if(app.usuario.idTipoUsuario==2) app.showingAdministrador = true;
-         if(app.usuario.idTipoUsuario==1) {
-             app.showingTecnico = true;
-             
-         }
-        
+            console.log("chacho", app.usuario.idTipoUsuario, app.usuarioLogueado.usuario);
+            if (app.usuario.idTipoUsuario == 1){
+                app.showingAdministrador = true;
+                app.showingAdministrativo = false;
+                app.showingTecnico = false;
+            }
+            if (app.usuario.idTipoUsuario == 2){  /*Tine que se ==*/
+                app.showingAdministrativo = true;
+                app.showingTecnico = false;
+                app.showingAdministrador = false;
+            }
+            if (app.usuario.idTipoUsuario == 3) {
+                app.showingTecnico = true;
+                app.showingAdministrador = false;
+                app.showingAdministrativo = false;
+                app.getExpedientesTecnico();
+            }
+            
         },
         //Usuario/////////////
         grabarUsuario: function () {
-            app.usuario.idPersona = app.persona.id;
-            console.log(app.usuario.id,app.usuario.idPersona,app.usuario.idTipoUsuario,app.usuario.usuario,app.usuario.contraseña);
-            var formData = app.toFormData(app.usuario);
+            app.newUsuario.idPersona = app.persona.id;
+            console.log(app.newUsuario.idPersona, app.newUsuario.idTipoUsuario, app.newUsuario.usuario, app.newUsuario.contraseña);
+            var formData = app.toFormData(app.newUsuario);
             axios.post("http://localhost/expedientes/php/api.php?action=grabarUsuario", formData)
                     .then(function (response) {
                         console.log(response);
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
                         } else {
+                            app.newUsuario = {};
                             app.successMessage = response.data.message;
                             app.usuario = response.data.usuario;
                             app.sesionTipoUsuario();
@@ -145,7 +160,7 @@ var app = new Vue({
                         }
                     });
         },
-        getProvincias: function (pais) {        
+        getProvincias: function (pais) {
             app.direccion.idPais = pais.id;
             var formData = app.toFormData(pais);
             axios.post("http://localhost/expedientes/php/api.php?action=mostrarProvincias", formData)
@@ -159,8 +174,8 @@ var app = new Vue({
                     });
 
         },
-        getMunicipios: function (p) {  
-            app.direccion.idProvincia = p.id;
+        getMunicipios: function (p) {
+            //app.direccion.idProvincia = p.id;
             var formData = app.toFormData(p);
             axios.post("http://localhost/expedientes/php/api.php?action=mostrarMunicipios", formData)
                     .then(function (response) {
@@ -173,7 +188,7 @@ var app = new Vue({
                     });
 
         },
-        getLocalidades: function (p) {  
+        getLocalidades: function (p) {
             var formData = app.toFormData(p);
             axios.post("http://localhost/expedientes/php/api.php?action=mostrarLocalidades", formData)
                     .then(function (response) {
@@ -186,36 +201,92 @@ var app = new Vue({
                     });
 
         },
-         setMunicipio: function (m) {
-            app.direccion.idMunicipio = m.id;
-            console.log(app.direccion.idMunicipio);
+        addProvincia: function () {
+            app.provincia.idPais = app.direccion.idPais;
+            var formData = app.toFormData(app.provincia);
+            axios.post("http://localhost/expedientes/php/api.php?action=añadirProvincia", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                            console.log("No se ha insertado provincia");
+                        } else {
+                            app.successMessage = response.data.message;
+                            app.direccion.idProvincia = response.data.id;
+                            app.añadirDireccion();
+                        }
+                    });
         },
-        setLocalidad: function (l) {
-            app.direccion.idLocalidad = l.id;
-        },
-        añadirDireccion: function () {          
-            var formData = app.toFormData(app.direccion);
-           // console.log(app.direccion.idPais,app.direccion.id,app.direccion.codPostal,app.direccion.direccion);
-            axios.post("http://localhost/expedientes/php/api.php?action=añadirDireccion", formData)
+        addMunicipio: function () {
+            app.municipio.idProvincia = app.direccion.idProvincia;
+            var formData = app.toFormData(app.municipio);
+            axios.post("http://localhost/expedientes/php/api.php?action=añadirMunicipio", formData)
                     .then(function (response) {
                         console.log(response);
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
                         } else {
                             app.successMessage = response.data.message;
-                            app.direccion.id = response.data.insert_id;
-                            console.log(app.direccion.id);
-                            app.showingPersona = true;
-                            
+                            app.direccion.idMunicipio = response.data.id;
+                            app.añadirDireccion();
                         }
                     });
-                   
-              //      app.showingPersona = true;
+        },
+        addLocalidad: function () {
+            app.localidad.idProvincia = app.direccion.idProvincia;
+            var formData = app.toFormData(app.localidad);
+            axios.post("http://localhost/expedientes/php/api.php?action=añadirLocalidad", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.successMessage = response.data.message;
+                            app.direccion.idLocalidad = response.data.id;
+                            app.añadirDireccion();
+                        }
+                    });
+        },
+
+        setProvincia: function (p) {
+            app.direccion.idProvincia = p.id;
+        },
+        setMunicipio: function (m) {
+            app.direccion.idMunicipio = m.id;
+            // console.log(app.direccion.idMunicipio);
+        },
+        setLocalidad: function (l) {
+            app.direccion.idLocalidad = l.id;
+        },
+        añadirDireccion: function () {
+            if (app.direccion.idProvincia === 0)
+                app.addProvincia();
+            else if (app.direccion.idMunicipio === 0)
+                app.addMunicipio();
+            else if (app.direccion.idLocalidad === 0)
+                app.addLocalidad();
+            else {
+                console.log(app.direccion.idPais, app.direccion.idProvincia, app.direccion.idMunicipio, app.direccion.idLocalidad, app.direccion.codPostal, app.direccion.direccion);
+                var formData = app.toFormData(app.direccion);
+                axios.post("http://localhost/expedientes/php/api.php?action=añadirDireccion", formData)
+                        .then(function (response) {
+                            console.log(response);
+                            if (response.data.error) {
+                                app.errorMessage = response.data.message;
+                            } else {
+                                app.successMessage = response.data.message;
+                                app.direccion.id = response.data.insert_id;
+                                app.showingPersona = true;
+
+                            }
+                        });
+            }
+            //      app.showingPersona = true;
         },
         //Persona///////////
-        añadirPersona: function () {           
+        añadirPersona: function () {
             app.persona.idDireccion = app.direccion.id;
-             console.log(app.persona.email,app.persona.dni,app.persona.idDireccion,app.persona.nombre,app.persona.telefono);
+            console.log(app.persona.email, app.persona.dni, app.persona.idDireccion, app.persona.nombre, app.persona.telefono);
             var formData = app.toFormData(app.persona);
             axios.post("http://localhost/expedientes/php/api.php?action=añadirPersona", formData)
                     .then(function (response) {
@@ -227,23 +298,30 @@ var app = new Vue({
                             app.successMessage = response.data.message;
                             app.persona.id = response.data.id;
                             app.showingUsuario = true;
+
+                        }
+                    });
+        },
+
+        //Expedientes///////////////
+        getExpedientesTecnico: function () {
+            console.log(app.usuario.id,app.usuario.idPersona,app.usuario.idTipoUsuario, app.usuario.usuario,app.usuario.contraseña,"$$$$$");
+            var dataFormat  = app.toFormData(app.usuario);
+             
+            axios.post("http://localhost/expedientes/php/api.php?action=mostrarExpedientesTecnico", dataFormat)
+                    .then(function (response) {
+                     
+                        console.log(response);
+                        if (response.data.error) {
+                          
+                            app.errorMessage = response.data.message;
+                            
+                        } else {
+                            app.expedientes = response.data.expedientes;
                             
                         }
                     });
         },
-       
-        //Expedientes///////////////
-        getExpedientesTecnico: function () {
-            axios.get("http://localhost/expedientes/php/api.php?action=mostrarExpedientesTecnico",app.usuario)
-                    .then(function (response) {
-                        console.log(response);
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-                        } else {
-                            app.expedientes = response.data.expedientes;
-                        }
-                    });
-        } ,
         getAllExpedientes: function () {
             axios.get("http://localhost/expedientes/php/api.php?action=mostrarExpedientes")
                     .then(function (response) {
@@ -366,6 +444,7 @@ var app = new Vue({
             app.clickedUser = user;
         },
 
+        //Funcion que pasa un objeto vue a objeto $_post['']
         toFormData: function (obj) {
             var form_data = new FormData();
             for (var key in obj) {
