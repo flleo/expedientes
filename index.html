@@ -18,7 +18,6 @@
                     <div v-if="showingNoLogueado">
                         <button class="right addnew" @click="showingLogin = true;">Login</button>
                         <button class="right addnew" @click="showingDireccion = true;">Registrarse</button>
-                        <button class="right addnew" @click="showingNuevoExpediente = true;">Nuevo Expediente</button>
                     </div>
                     <div  v-if="showingAdministrador">
                         <p class="right addnew">{{usuarioLogueado.usuario}}</p>
@@ -33,6 +32,7 @@
                     <div  v-if="showingTecnico">
                         <p class="right addnew">{{usuarioLogueado.usuario}}</p>
                         <button class="right addnew" @click="showingTecnico=false;showingNoLogueado=true;">Salir</button>
+
                     </div>
 
                     <div class="fix"></div>
@@ -41,40 +41,76 @@
                 <hr>
                 <p class="errorMessage" v-if="errorMessage">{{errorMessage}}</p>
                 <p class="successMessage" v-if="successMessage">{{successMessage}}</p>
-
+                <!--Expedientes ids-->
                 <table class="list" v-if="showingExpedientes">
                     <tr>
                         <th>ID</th>
-                        <th>IdUrgente</th>
-                        <th>IdTipo</th>
+                        <th>Urgente</th>
+                        <th>Tipo</th>
                         <th>fecha</th>
                         <th>Numero</th>
-                        <th>IdTitular</th>
-                        <th>IdDireccion</th>
-                        <th>IdProyectista</th>
-                        <th>IdCalificacion</th>
-                        <th>IdIAE</th>
-                        <th>IdEstado</th>
+                        <th>Titular</th>
+                        <th>Direccion</th>
+                        <th>Proyectista</th>
+                        <th>Calificacion</th>
+                        <th>IAE</th>
+                        <th>Estado</th>
                         <th>Descripcion</th>
                     </tr>
                     <tr v-for="expediente in expedientes">
                         <td>{{expediente.id}}</td>
-                        <td>{{expediente.idUrgente}}</td>
-                        <td>{{expediente.idTipoExpediente}}</td>
+                        <td>{{expediente.urgente}}</td>
+                        <td>{{expediente.tipo}}</td>
                         <td>{{expediente.fecha}}</td>
                         <td>{{expediente.numero}}</td>
-                        <td>{{expediente.idTitular}}</td>
-                        <td>{{expediente.idDireccion}}</td>
-                        <td>{{expediente.idProyectista}}</td>
-                        <td>{{expediente.idCalificacion}}</td>
-                        <td>{{expediente.idIAE}}</td>
-                        <td>{{expediente.idEstado}}</td>
+                        <td>{{expediente.titular}}</td>
+                        <td>{{expediente.direccion}}</td>
+                        <td>{{expediente.proyectista}}</td>
+                        <td>{{expediente.calificacion}}</td>
+                        <td>{{expediente.iae}}</td>
+                        <td>{{expediente.estado}}</td>
                         <td>{{expediente.descripcion}}</td>
-                        <td><button  @click="showingEditarExpediente = true; selectExpediente(expediente)">Editar</button></td>
-                        <td><button  @click="showingDeleteExpediente = true; selectExpediente(expediente)" >Eliminar</button></td>
+                        <td v-if="(showingAdministrador || showingAdministrativo)"><button  @click="showingEditarExpediente = true; selectExpediente(expediente)">Editar</button></td>
+                        <td v-if="(showingAdministrador || showingAdministrativo)"><button  @click="showingDeleteExpediente = true; selectExpediente(expediente)" >Eliminar</button></td>
+                        <td v-if="(showingTecnico || showingAdministrador)"><button  @click="showingCalificar=true;setNewCalificacion(expediente)">Calificar</button></td>
                     </tr>
                 </table>
 
+                <!--Calificar -->
+                <div class="modalmedium col-md-6" id="calificar" v-if="showingCalificar">
+                    <div class="modalheading">
+                        <p class="left">Calificar</p>
+                        <p class="right close" @click="showingCalificar = false;">x</p>
+                        <div class="fix"></div>
+                    </div>
+                    <div class="modalbody">
+                        <div class="modalcontent">
+                            <table class="form">
+                                <tr>
+                                    <th>Expediente</th>
+                                    <th>:</th>
+                                    <td><input type="text" placeholder="Numero expediente" v-model="newCalificacion.idExpediente"></td>
+                                </tr>
+                                <tr>
+                                    <th>Calificación</th>
+                                    <th>:</th>
+                                    <td>
+                                        <select>
+                                            <option >Please select one</option>
+                                            <option v-for="c in calificaciones"  @click="setCalificacion(c)">{{c.calificacion}}</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                
+                            </table>
+                            <div class="margin"></div>
+                            <table class="margin_left">
+                                    <td > <button class="center"  @click="showingCalificar = false; calificar()">Enviar</button></td>
+                            </table> 
+                            <div class="margin"></div>
+                        </div>
+                    </div>
+                </div>
                 <!--Registrarse Direccion-->
                 <div class="modalmedium col-md-6" id="direccion" v-if="showingDireccion">
                     <div class="modalheading">
@@ -342,7 +378,7 @@
                             <div class="margin"></div>
                             <table  class="margin_left">
                                 <tr>
-                                    <td><button class="center"  @click="showingNuevoExpediente = false; creaExpediente();" >Añade Expediente</button></td>
+                                    <td><button class="center"  @click="showingNuevoExpediente = false; creaExpediente();" >Enviar</button></td>
                                 </tr>
                             </table>
                         </div>
@@ -419,7 +455,7 @@
                 </div>
 
                 <!-- Eliminar expediente -->
-                <div class="modal col-md-6" id="deleteExpediente" v-if="showingDeleteExpediente">
+                <div class="modalmedium col-md-6" id="deleteExpediente" v-if="showingDeleteExpediente">
                     <div class="modalheading">
                         <p class="left">Eliminar Expediente</p>
                         <p class="right close" @click="showingDeleteExpediente = false;">x</p>
@@ -433,9 +469,9 @@
                             <div class="margin"></div>
                             <h4 class="center">{{expediente.numero}}</h4>
                             <div class="margin"></div>
-                            <div class="col-md-6 center">
-                                <button class="left" @click="showingDeleteExpediente = false; deleteExpediente()">YES</button>
-                                <button class="right" @click="showingDeleteExpediente = false;">NO</button>
+                            <div class="margin_left">
+                                <button class="warning" @click="showingDeleteExpediente = false; deleteExpediente()">YES</button>
+                                <button  @click="showingDeleteExpediente = false;">NO</button>
                             </div>
                         </div>
                     </div>

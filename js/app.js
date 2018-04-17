@@ -8,9 +8,11 @@ var app = new Vue({
         this.getAllExpedientes();
         this.getAllPaises();
         this.getAllTipoUsuarios();
+        this.getAllCalificaciones();
 
     },
     data: {
+        showingCalificar: false,
         showingTecnico: false,
         showingAdministrador: false,
         showingAdministrativo: false,
@@ -28,26 +30,36 @@ var app = new Vue({
         successMessage: "",
         selectedPais: "España",
         selectedProvincia: "Santa Cruz de Tenerife",
+        calificaciones: [],
         expedientes: [],
         paises: [],
         provincias: [],
         municipios: [],
         localidades: [],
         tipoUsuarios: [],
-        persona: {id: 0, dni: "", nombre: "", idDireccion: 0, email: "", telefono: ""},
+        
+        IAE:{},
         pais: {id: 0, pais: "España"},
+        persona: {id: 0, dni: "", nombre: "", idDireccion: 0, email: "", telefono: ""},
         provincia: {id: 0, idPais: 0, provincia: ""},
         municipio: {id: 0, idProvincia: 0, municipio: ""},
         localidad: {id: 0, idProvincia: 0, localidad: ""},
         direccion: {id: 0, idPais: 0, idProvincia: 0, idMunicipio: 0, idLocalidad: 0, codPostal: "", direccion: ""},
-        newExpediente: {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular: 0, idDireccion: 0, idProyectista: 0, idCalificacion: 0, idIAE: 0, descripcion: ""},
         login: {usuario: "", contraseña: ""},
-        usuario: {id: 0, idPersona: 0, idTipoUsuario: 0, usuario: "", contraseña: ""},
-        newUsuario:{},
-        usuarioLogueado: {usuario:""},
+        
         tipoUsuario: {id: 0, tipo: ""},
+        newExpediente: {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular: 0, idDireccion: 0, idProyectista: 0, idCalificacion: 0, idIAE: 0, descripcion: ""},
+        newUsuario:{},
+        newCalificacion:{id:0,idExpediente:"",idTecnico:0,idCalificaciones:0},
+        estado:{},
         expediente: {},
+        tipoExpediente: {id:0,tipo:""},
+        usuario: {id: 0, idPersona: 0, idTipoUsuario: 0, usuario: "", contraseña: ""},
+        usuarioLogueado: {usuario:""},
+        urgente:{},
+        calificacion: {},
         clickedRegistrarse: {},
+        
 
     },
 
@@ -114,6 +126,59 @@ var app = new Vue({
             }
             
         },
+        //Calificacion////////
+        setNewCalificacion: function (e) {
+          app.newCalificacion.id = e.idCalificacion;
+          app.newCalificacion.idExpediente = e.numero; 
+          app.newCalificacion.idTecnico = app.usuario.id;
+          
+        },
+        
+        calificar: function () {
+            console.log(app.newCalificacion.id,app.newCalificacion.idCalificaciones,app.newCalificacion.idExpediente,app.newCalificacion.idTecnico);
+            var formData = app.toFormData(app.newCalificacion);
+            axios.post("http://localhost/expedientes/php/api.php?action=actualizarCalificacion", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.newCalificacion = {};
+                            app.actualizarExpedienteEstado();
+                            app.successMessage = response.data.message;
+                            app.getExpedientesTecnico();
+                        }
+                    });
+        },
+        
+        setCalificacion: function(c){
+            app.newCalificacion.idCalificaciones = c.id;
+        },
+        getAllCalificaciones: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarCalificaciones")
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.calificaciones = response.data.calificaciones;
+                        }
+                    });
+        },
+        //Estado//////////////
+        actualizarExpedienteEstado: function() {
+            var formData = app.toFormData(app.expediente);
+            axios.post("http://localhost/expedientes/php/api.php?action=actualizarExpedienteEstado", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.successMessage = response.data.message;
+                            app.getExpedientesTecnico();
+                        }
+                    });
+        },
         //Usuario/////////////
         grabarUsuario: function () {
             app.newUsuario.idPersona = app.persona.id;
@@ -160,6 +225,7 @@ var app = new Vue({
                         }
                     });
         },
+        
         getProvincias: function (pais) {
             app.direccion.idPais = pais.id;
             var formData = app.toFormData(pais);
@@ -344,11 +410,27 @@ var app = new Vue({
                             app.errorMessage = response.data.message;
 
                         } else {
+                            app.expediente.id = response.data.id;
+                            app.generaNumeroExpediente();
                             app.successMessage = response.data.message;
                             app.getAllExpedientes();
                         }
                     });
         },
+        generaNumeroExpediente: function () {
+          /*  var formData = app.toFormData(app.expediente);
+            axios.post("http://localhost/expedientes/php/api.php?action=generaNumeroExpediente", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.successMessage = response.data.message;
+                            app.getAllExpedientes();
+                        }
+                    });*/
+        },
+        
         updateExpediente: function () {
 
             var formData = app.toFormData(app.expediente);

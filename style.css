@@ -156,9 +156,9 @@ table.form {
 .margin{
     margin: 30px 0;
 }
-.margin_left{
+.margin_left{  
     display: block;
-    margin-left:  40%;
+    margin-left: 40%;
 }
 .margin_left_login{
     display: block;
@@ -183,4 +183,8 @@ p.successMessage {
 .form td input {
     padding:5px 10px;
     outline: 0;
+}
+
+.warning {
+    background-color: #ff6666;
 }
