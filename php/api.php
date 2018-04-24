@@ -20,19 +20,6 @@ if ($action == 'mostrarCalificaciones') {
     $res['calificaciones'] = $calificaciones;
 }
 
-if ($action == 'actualizarCalificacion') {
-    $id = $_POST['id'];
-    $idCalificaciones = $_POST['idCalificaciones'];
-
-    $result = $conn->query("UPDATE `calificacion` SET `idCalificaciones`=$idCalificaciones,`fecha`=default WHERE id=$id");
-    if ($result) {
-        $res['message'] = "Calificacion Actualizada correctamente";
-    } else {
-        $res['error'] = true;
-        $res['message'] = "La actualización del Calificacion ha fallado";
-    }
-}
-
 if ($action == 'grabarCalificacion') {
     $id = $_POST['id'];
     $idExpediente = $_POST['idExpediente'];
@@ -50,6 +37,148 @@ if ($action == 'grabarCalificacion') {
     }
 }
 
+
+//Expedientes/////////////////////////////////////////////////////////////////////////////////////////////
+//Actualizaciones//////////////////////////////////////////////////
+if ($action == 'actualizaExpedienteCalificacion') {
+    $id = $_POST['id'];
+    $idExpediente = $_POST['idExpediente'];
+
+    $result = $conn->query("UPDATE `expediente` SET `idCalificacion`=$id WHERE numero='$idExpediente'");
+    if ($result) {
+        $res['message'] = "Calificacion Actualizada correctamente";
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La actualización del Calificacion ha fallado";
+    }
+}
+if ($action == 'actualizarExpedienteEstado') {
+    $id = $_POST['id'];
+
+    $result = $conn->query("UPDATE `expediente` SET `idEstado`=1 WHERE `id`=$id");
+    if ($result) {
+        $res['message'] = "Estado Actualizado correctamente";
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La actualización del Estado ha fallado";
+    }
+}
+
+//Expedientes////////////////////////////////////////
+if ($action == 'mostrarExpedientesTecnico') {
+    $idTecnico = $_POST['id'];
+    $result = $conn->query("
+SELECT   expediente.id, urgente.urgente, tipoExpediente.tipo, expediente.fecha, expediente.numero, titular.nombre AS titular, direccion.direccion, proyectista.nombre AS proyectista, calificaciones.calificacion, IAE.denominacion AS iae , estado.estado,expediente.descripcion  
+FROM `expediente` INNER JOIN urgente ON urgente.id=expediente.idUrgente INNER JOIN tipoExpediente ON tipoExpediente.id=expediente.idTipoExpediente
+INNER JOIN persona AS titular ON titular.id=expediente.idTitular INNER JOIN direccion ON direccion.id=expediente.idDireccion
+INNER JOIN persona AS proyectista ON proyectista.id=expediente.idProyectista 
+INNER JOIN calificacion ON calificacion.id=expediente.idCalificacion 
+INNER JOIN calificaciones ON calificaciones.id=calificacion.idCalificaciones
+INNER JOIN IAE ON IAE.id=expediente.idIAE INNER JOIN estado ON estado.id=expediente.idEstado
+ORDER BY expediente.id WHERE calificacion.idTecnico=$idTecnico");
+    $expedientes = array();
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($expedientes, $row);
+    }
+    $res['expedientes'] = $expedientes;
+}
+if ($action == 'mostrarExpedientes') {
+    $result = $conn->query("
+SELECT   expediente.id, urgente.urgente, tipoExpediente.tipo, expediente.fecha, expediente.numero, titular.nombre AS titular, direccion.direccion, proyectista.nombre AS proyectista, calificaciones.calificacion, IAE.denominacion AS iae , estado.estado,expediente.descripcion  
+FROM `expediente` INNER JOIN urgente ON urgente.id=expediente.idUrgente INNER JOIN tipoExpediente ON tipoExpediente.id=expediente.idTipoExpediente
+INNER JOIN persona AS titular ON titular.id=expediente.idTitular INNER JOIN direccion ON direccion.id=expediente.idDireccion
+INNER JOIN persona AS proyectista ON proyectista.id=expediente.idProyectista 
+INNER JOIN calificacion ON calificacion.id=expediente.idCalificacion 
+INNER JOIN calificaciones ON calificaciones.id=calificacion.idCalificaciones
+INNER JOIN IAE ON IAE.id=expediente.idIAE INNER JOIN estado ON estado.id=expediente.idEstado
+ORDER BY expediente.id
+");
+    $expedientes = array();
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($expedientes, $row);
+    }
+    $res['expedientes'] = $expedientes;
+}
+
+if ($action == 'creaExpediente') {
+
+    $idUrgente = $_POST['idUrgente'];
+    $idTipoExpediente = $_POST['idTipoExpediente'];
+    $fecha = $_POST['fecha'];
+    $idTitular = $_POST['idTitular'];
+    $idDireccion = $_POST['idDireccion'];
+    $idProyectista = $_POST['idProyectista'];
+    $idCalificacion = $_POST['idCalificacion'];
+    $idIAE = $_POST['idIAE'];
+    $idEstado = $_POST['idEstado'];
+    $descripcion = $_POST['descripcion'];
+
+
+    $result = $conn->query("INSERT INTO `expediente` (`id`, `idUrgente`, `idTipoExpediente`, `fecha`, `numero`, `idTitular`, `idDireccion`, `idProyectista`, `idCalificacion`, `idIAE`, `idEstado`, `descripcion`)
+													VALUES (null,$idUrgente, $idTipoExpediente, '$fecha', null, $idTitular,$idDireccion, $idProyectista,$idCalificacion,$idIAE,$idEstado,'$descripcion')");
+    if ($result) {
+        $res['message'] = "Expediente añadido con éxito";
+        $res['id'] = $conn->insert_id;
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La inserción ha fallado";
+    }
+}
+
+if ($action == 'generaNumeroExpediente') {
+    $id = $_POST['id'];
+    $fecha = $_POST['fecha'];
+    $tipo = $_POST['tipo'];
+
+    $result = $conn->query("UPDATE expediente SET numero = CONCAT($tipo,'-',id,'/',año) WHERE expediente.id = id");
+    if ($result) {
+        $res['message'] = "Expediente añadido con éxito";
+        $res['id'] = $conn->insert_id;
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La inserción ha fallado";
+    }
+}
+
+if ($action == 'updateExpediente') {
+    $id = $_POST['id'];
+    $idUrgente = $_POST['idUrgente'];
+    $idTipoExpediente = $_POST['idTipoExpediente'];
+    $fecha = $_POST['fecha'];
+    $numero = $_POST['numero'];
+    $idTitular = $_POST['idTitular'];
+    $idDireccion = $_POST['idDireccion'];
+    $idProyectista = $_POST['idProyectista'];
+    $idCalificacion = $_POST['idCalificacion'];
+    $idIAE = $_POST['idIAE'];
+    $idEstado = $_POST['idEstado'];
+    $descripcion = $_POST['descripcion'];
+
+
+    $result = $conn->query("UPDATE `expediente` SET `idUrgente`=$idUrgente,`idTipoExpediente`=$idTipoExpediente,`fecha`='$fecha',`numero`='$numero',`idTitular`=$idTitular,`idDireccion`=$idDireccion,`idProyectista`=$idProyectista,`idCalificacion`=$idCalificacion,`idIAE`=$idIAE,`idEstado`=$idEstado,`descripcion`='$descripcion' WHERE `id`=$id");
+    if ($result) {
+        $res['message'] = "Expediente Actualizado correctamente";
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La actualización del expediente ha fallado";
+    }
+}
+
+
+if ($action == 'deleteExpediente') {
+    $id = $_POST['id'];
+
+
+    $result = $conn->query("DELETE FROM `expediente` WHERE `id` = $id");
+    if ($result) {
+        $res['message'] = "Expediente eliminado";
+    } else {
+        $res['error'] = true;
+        $res['message'] = "La eliminación del expediente ha fallado";
+    }
+}
 //Login/////////////////////////////////////////////////////
 if ($action == 'comprobarLogin') {
     $usuario = $_POST['usuario'];
@@ -64,17 +193,83 @@ if ($action == 'comprobarLogin') {
         $res['message'] = "Login fallido";
     }
 }
-
-//Tipo Usuario//////////////////////////////////////
-if ($action == 'mostrarTipoUsuarios') {
-    $result = $conn->query("SELECT * FROM `tipoUsuario`");
-    $tipoUsuarios = array();
-
+//NewExpedientes//////////////////////////////////////////////////////
+////Direccio/////////////////////////////
+if ($action == 'mostrarDirecciones') {
+    $result = $conn->query("SELECT * FROM `direccion`");
+    
+    $resultados = array();
     while ($row = $result->fetch_assoc()) {
-        array_push($tipoUsuarios, $row);
+        array_push($resultados, $row);
     }
-    $res['tipoUsuarios'] = $tipoUsuarios;
+    $res['direcciones'] = $resultados;
 }
+////Estado/////////////////////////////
+if ($action == 'mostrarEstados') {
+    $result = $conn->query("SELECT * FROM `estado`");
+    
+    $resultados = array();
+    while ($row = $result->fetch_assoc()) {
+        array_push($resultados, $row);
+    }
+    $res['estados'] = $resultados;
+}
+
+////IAE/////////////////////////////
+if ($action == 'mostrarIAEs') {
+    $result = $conn->query("SELECT * FROM `IAE`");
+    
+    $resultados = array();
+    while ($row = $result->fetch_assoc()) {
+        array_push($resultados, $row);
+    }
+    $res['IAEs'] = $resultados;
+}
+////TipoExpedientes///////////
+if ($action == 'mostrarTipoExpedientes') {
+    $result = $conn->query("SELECT * FROM `tipoExpediente`");
+    
+    $resultados = array();
+    while ($row = $result->fetch_assoc()) {
+        array_push($resultados, $row);
+    }
+    $res['tipoExpedientes'] = $resultados;
+}
+//Titulares//////////////////
+if ($action == 'mostrarTitulares') {
+    $result = $conn->query("SELECT DISTINCT persona.id,persona.dni,persona.nombre,persona.idDireccion,persona.email,persona.telefono FROM persona INNER JOIN expediente ON expediente.idTitular=persona.id");
+    
+    $resultados = array();
+    while ($row = $result->fetch_assoc()) {
+        array_push($resultados, $row);
+    }
+    $res['titulares'] = $resultados;
+}
+
+//Proyectistas /////////////////////////////////////
+if ($action == 'mostrarProyectistas') {
+    $result = $conn->query("SELECT DISTINCT persona.id,persona.dni,persona.nombre,persona.idDireccion,persona.email,persona.telefono FROM persona INNER JOIN expediente ON expediente.idProyectista=persona.id");
+    
+    $resultados = array();
+    while ($row = $result->fetch_assoc()) {
+        array_push($resultados, $row);
+    }
+    $res['proyectistas'] = $resultados;
+}
+//Urgentes/////////////
+if ($action == 'mostrarUrgentes') {
+    $result = $conn->query("SELECT * FROM `urgente`");
+    
+    $urgentes = array();
+    while ($row = $result->fetch_assoc()) {
+        array_push($urgentes, $row);
+    }
+    $res['urgentes'] = $urgentes;
+}
+
+//fin NewExpediientes///////////////////////////////////////////
+
+
 //Registrarse//////////////////////////////////////////////
 if ($action == 'registrarse') {
     $id = $_POST['id'];
@@ -231,6 +426,18 @@ if ($action == 'añadirPersona') {
     }
 }
 
+//Tipo Usuario//////////////////////////////////////
+if ($action == 'mostrarTipoUsuarios') {
+    $result = $conn->query("SELECT * FROM `tipoUsuario`");
+    $tipoUsuarios = array();
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($tipoUsuarios, $row);
+    }
+    $res['tipoUsuarios'] = $tipoUsuarios;
+}
+
+
 //Usuario//////////////////////////////////////////////
 if ($action == 'grabarUsuario') {
     $id = $_POST['id'];
@@ -277,138 +484,6 @@ function comprobarDni($nif) {
     }
     return $ok;
 }
-
-//Expedientes//////////////////////////////////////////////////
-//Estado//////////////////////////////////////////////////
-if ($action == 'actualizarExpedienteEstado') {
-    $id = $_POST['id'];
-
-    $result = $conn->query("UPDATE `expediente` SET `idEstado`=1 WHERE `id`=$id");
-    if ($result) {
-        $res['message'] = "Estado Actualizado correctamente";
-    } else {
-        $res['error'] = true;
-        $res['message'] = "La actualización del Estado ha fallado";
-    }
-}
-
-if ($action == 'mostrarExpedientesTecnico') {
-    $idTecnico = $_POST['id'];
-    $result = $conn->query("
-SELECT   expediente.id, urgente.urgente, tipoExpediente.tipo, expediente.fecha, expediente.numero, titular.nombre AS titular, direccion.direccion, proyectista.nombre AS proyectista, calificaciones.calificacion, IAE.denominacion AS iae , estado.estado,expediente.descripcion  
-FROM `expediente` INNER JOIN urgente ON urgente.id=expediente.idUrgente INNER JOIN tipoExpediente ON tipoExpediente.id=expediente.idTipoExpediente
-INNER JOIN persona AS titular ON titular.id=expediente.idTitular INNER JOIN direccion ON direccion.id=expediente.idDireccion
-INNER JOIN persona AS proyectista ON proyectista.id=expediente.idProyectista 
-INNER JOIN calificacion ON calificacion.id=expediente.idCalificacion 
-INNER JOIN calificaciones ON calificaciones.id=calificacion.idCalificaciones
-INNER JOIN IAE ON IAE.id=expediente.idIAE INNER JOIN estado ON estado.id=expediente.idEstado
-ORDER BY expediente.id WHERE calificacion.idTecnico=$idTecnico");
-    $expedientes = array();
-
-    while ($row = $result->fetch_assoc()) {
-        array_push($expedientes, $row);
-    }
-    $res['expedientes'] = $expedientes;
-}
-if ($action == 'mostrarExpedientes') {
-    $result = $conn->query("
-SELECT   expediente.id, urgente.urgente, tipoExpediente.tipo, expediente.fecha, expediente.numero, titular.nombre AS titular, direccion.direccion, proyectista.nombre AS proyectista, calificaciones.calificacion, IAE.denominacion AS iae , estado.estado,expediente.descripcion  
-FROM `expediente` INNER JOIN urgente ON urgente.id=expediente.idUrgente INNER JOIN tipoExpediente ON tipoExpediente.id=expediente.idTipoExpediente
-INNER JOIN persona AS titular ON titular.id=expediente.idTitular INNER JOIN direccion ON direccion.id=expediente.idDireccion
-INNER JOIN persona AS proyectista ON proyectista.id=expediente.idProyectista 
-INNER JOIN calificacion ON calificacion.id=expediente.idCalificacion 
-INNER JOIN calificaciones ON calificaciones.id=calificacion.idCalificaciones
-INNER JOIN IAE ON IAE.id=expediente.idIAE INNER JOIN estado ON estado.id=expediente.idEstado
-ORDER BY expediente.id
-");
-    $expedientes = array();
-
-    while ($row = $result->fetch_assoc()) {
-        array_push($expedientes, $row);
-    }
-    $res['expedientes'] = $expedientes;
-}
-
-if ($action == 'creaExpediente') {
-
-    $idUrgente = $_POST['idUrgente'];
-    $idTipoExpediente = $_POST['idTipoExpediente'];
-    $fecha = $_POST['fecha'];
-    $idTitular = $_POST['idTitular'];
-    $idDireccion = $_POST['idDireccion'];
-    $idProyectista = $_POST['idProyectista'];
-    $idCalificacion = $_POST['idCalificacion'];
-    $idIAE = $_POST['idIAE'];
-    $idEstado = $_POST['idEstado'];
-    $descripcion = $_POST['descripcion'];
-
-
-    $result = $conn->query("INSERT INTO `expediente` (`id`, `idUrgente`, `idTipoExpediente`, `fecha`, `numero`, `idTitular`, `idDireccion`, `idProyectista`, `idCalificacion`, `idIAE`, `idEstado`, `descripcion`)
-													VALUES (null,$idUrgente, $idTipoExpediente, '$fecha', null, $idTitular,$idDireccion, $idProyectista,$idCalificacion,$idIAE,$idEstado,'$descripcion')");
-    if ($result) {
-        $res['message'] = "Expediente añadido con éxito";
-        $res['id'] = $conn->insert_id;
-    } else {
-        $res['error'] = true;
-        $res['message'] = "La inserción ha fallado";
-    }
-}
-
-if ($action == 'generaNumeroExpediente') {
-    $id = $_POST['id'];
-    $fecha = $_POST['fecha'];
-    $tipo = $_POST['tipo'];
-
-    $result = $conn->query("UPDATE expediente SET numero = CONCAT($tipo,'-',id,'/',año) WHERE expediente.id = id");
-    if ($result) {
-        $res['message'] = "Expediente añadido con éxito";
-        $res['id'] = $conn->insert_id;
-    } else {
-        $res['error'] = true;
-        $res['message'] = "La inserción ha fallado";
-    }
-}
-
-if ($action == 'updateExpediente') {
-    $id = $_POST['id'];
-    $idUrgente = $_POST['idUrgente'];
-    $idTipoExpediente = $_POST['idTipoExpediente'];
-    $fecha = $_POST['fecha'];
-    $numero = $_POST['numero'];
-    $idTitular = $_POST['idTitular'];
-    $idDireccion = $_POST['idDireccion'];
-    $idProyectista = $_POST['idProyectista'];
-    $idCalificacion = $_POST['idCalificacion'];
-    $idIAE = $_POST['idIAE'];
-    $idEstado = $_POST['idEstado'];
-    $descripcion = $_POST['descripcion'];
-
-
-    $result = $conn->query("UPDATE `expediente` SET `idUrgente`=$idUrgente,`idTipoExpediente`=$idTipoExpediente,`fecha`='$fecha',`numero`='$numero',`idTitular`=$idTitular,`idDireccion`=$idDireccion,`idProyectista`=$idProyectista,`idCalificacion`=$idCalificacion,`idIAE`=$idIAE,`idEstado`=$idEstado,`descripcion`='$descripcion' WHERE `id`=$id");
-    if ($result) {
-        $res['message'] = "Expediente Actualizado correctamente";
-    } else {
-        $res['error'] = true;
-        $res['message'] = "La actualización del expediente ha fallado";
-    }
-}
-
-
-if ($action == 'deleteExpediente') {
-    $id = $_POST['id'];
-
-
-    $result = $conn->query("DELETE FROM `expediente` WHERE `id` = $id");
-    if ($result) {
-        $res['message'] = "Expediente eliminado";
-    } else {
-        $res['error'] = true;
-        $res['message'] = "La eliminación del expediente ha fallado";
-    }
-}
-
-
-
 
 
 

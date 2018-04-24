@@ -22,12 +22,12 @@
                     <div  v-if="showingAdministrador">
                         <p class="right addnew">{{usuarioLogueado.usuario}}</p>
                         <button class="right addnew" @click="showingAdministrador = false;showingNoLogueado=true;">Salir</button>
-                        <button class="right addnew" @click="showingNuevoExpediente = true;">Nuevo Expediente</button>
+                        <button class="right addnew" @click="showingNuevoExpediente = true;reseteaNewExpediente();">Nuevo Expediente</button>
                     </div>
                     <div v-if="showingAdministrativo">
                         <p class="right addnew">{{usuarioLogueado.usuario}}</p>
                         <button class="right addnew" @click="showingAdministrativo=false;showingNoLogueado=true;">Salir</button>
-                        <button class="right addnew" @click="showingNuevoExpediente=true;">Nuevo Expediente</button>
+                        <button class="right addnew" @click="showingNuevoExpediente=true;reseteaNewExpediente();">Nuevo Expediente</button>
                     </div>
                     <div  v-if="showingTecnico">
                         <p class="right addnew">{{usuarioLogueado.usuario}}</p>
@@ -72,7 +72,7 @@
                         <td>{{expediente.descripcion}}</td>
                         <td v-if="(showingAdministrador || showingAdministrativo)"><button  @click="showingEditarExpediente = true; selectExpediente(expediente)">Editar</button></td>
                         <td v-if="(showingAdministrador || showingAdministrativo)"><button  @click="showingDeleteExpediente = true; selectExpediente(expediente)" >Eliminar</button></td>
-                        <td v-if="(showingTecnico || showingAdministrador)"><button  @click="showingCalificar=true;setNewCalificacion(expediente)">Calificar</button></td>
+                        <td v-if="(showingTecnico || showingAdministrador)"><button  @click="showingCalificar=true;setNewCalificacion(expediente);selectExpediente(expediente)">Calificar</button></td>
                     </tr>
                 </table>
 
@@ -89,7 +89,7 @@
                                 <tr>
                                     <th>Expediente</th>
                                     <th>:</th>
-                                    <td><input type="text" placeholder="Numero expediente" v-model="newCalificacion.idExpediente"></td>
+                                    <td><input type="text" placeholder="Numero expediente" v-model="newCalificacion.idExpediente" redonly></td>
                                 </tr>
                                 <tr>
                                     <th>Calificación</th>
@@ -97,7 +97,7 @@
                                     <td>
                                         <select>
                                             <option >Please select one</option>
-                                            <option v-for="c in calificaciones"  @click="setCalificacion(c)">{{c.calificacion}}</option>
+                                            <option v-for="c in calificaciones"  @click="setNewCalificacionIdCalificaciones(c)">{{c.calificacion}}</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -325,49 +325,40 @@
                         <div class="modalcontent">
                             <table class="form">
                                 <tr>
-                                    <th>IdUrgente</th>
+                                    <th>Urgente</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdUrgente" v-model="newExpediente.idUrgente"></td>
+                                    <td><select v-model="newExpediente.idUrgente" required><option v-for="u in urgentes"   v-bind:value="u.id">{{u.urgente}}</select></td>
                                 </tr>
                                 <tr>
-                                    <th>IdTipoExpediente</th>
+                                    <th>TipoExpediente</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdTipoExpediente" v-model="newExpediente.idTipoExpediente"></td>
+                                    <td><select><option v-for="t in tipoExpedientes" @click="setNewExpedienteIdTipoExpediente(t)">{{t.tipo}}</select></td>
+                                   
                                 </tr>
                                 <tr>
                                     <th>Fecha</th>
                                     <th>:</th>
-                                    <td><input type="date" placeholder="2018-12-01" v-model="newExpediente.fecha"></td>
+                                    <td><input type="date" v-model="newExpediente.fecha" required></td>
                                 </tr>
                                 <tr>
-                                    <th>IdTitular</th>
+                                    <th>Titular</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdTitular" v-model="newExpediente.idTitular"></td>
+                                    <td><select><option v-for="t in titulares" @click="setNewExpedienteIdTitular(t)">{{t.nombre}}</select></td>
                                 </tr>
                                 <tr>
-                                    <th>IdDireccion</th>
+                                    <th>Direccion</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdDireccion" v-model="newExpediente.idDireccion"></td>
+                                    <td><select><option v-for="d in direcciones" @click="setNewExpedienteIdDireccion(d)">{{d.direccion}}</select></td>
                                 </tr>
                                 <tr>
-                                    <th>IdProyectista</th>
+                                    <th>Proyectista</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdProyectista" v-model="newExpediente.idProyectista"></td>
+                                    <td><select><option v-for="p in proyectistas" @click="setNewExpedienteIdProyectista(p)">{{p.nombre}}</select></td>
                                 </tr>
                                 <tr>
-                                    <th>IdCalificacion</th>
+                                    <th>IAE</th>
                                     <th>:</th>
-                                    <td><input type="number" placeholder="IdCalificacion" v-model="newExpediente.idCalificacion"></td>
-                                </tr>
-                                <tr>
-                                    <th>IdIAE</th>
-                                    <th>:</th>
-                                    <td><input type="number" placeholder="IdIAE" v-model="newExpediente.idIAE"></td>
-                                </tr>
-                                <tr>
-                                    <th>IdEstado</th>
-                                    <th>:</th>
-                                    <td><input type="number" placeholder="IdEstado" v-model="newExpediente.idEstado"></td>
+                                    <td><select><option v-for="c in IAEs" @click="setNewExpedienteIdIAE(c)">{{c.denominacion}}</select></td>
                                 </tr>
                                 <tr>
                                     <th>Descripcion</th>

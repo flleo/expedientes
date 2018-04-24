@@ -6,10 +6,10 @@ var app = new Vue({
     created: function () {
         console.log("Expedientes");
         this.getAllExpedientes();
-        this.getAllPaises();
-        this.getAllTipoUsuarios();
-        this.getAllCalificaciones();
-
+        /*this.getAllPaises();
+         this.getAllTipoUsuarios();
+         this.getAllCalificaciones();
+         */
     },
     data: {
         showingCalificar: false,
@@ -31,14 +31,20 @@ var app = new Vue({
         selectedPais: "España",
         selectedProvincia: "Santa Cruz de Tenerife",
         calificaciones: [],
+        direcciones: [],
+        estados: [],
         expedientes: [],
+        IAEs: [],
+        localidades: [],
+        municipios: [],
         paises: [],
         provincias: [],
-        municipios: [],
-        localidades: [],
+        proyectistas: [],
+        tipoExpedientes: [],
         tipoUsuarios: [],
-        
-        IAE:{},
+        titulares: [],
+        urgentes: [],
+        IAE: {},
         pais: {id: 0, pais: "España"},
         persona: {id: 0, dni: "", nombre: "", idDireccion: 0, email: "", telefono: ""},
         provincia: {id: 0, idPais: 0, provincia: ""},
@@ -46,23 +52,19 @@ var app = new Vue({
         localidad: {id: 0, idProvincia: 0, localidad: ""},
         direccion: {id: 0, idPais: 0, idProvincia: 0, idMunicipio: 0, idLocalidad: 0, codPostal: "", direccion: ""},
         login: {usuario: "", contraseña: ""},
-        
         tipoUsuario: {id: 0, tipo: ""},
         newExpediente: {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular: 0, idDireccion: 0, idProyectista: 0, idCalificacion: 0, idIAE: 0, descripcion: ""},
-        newUsuario:{},
-        newCalificacion:{id:0,idExpediente:"",idTecnico:0,idCalificaciones:0},
-        estado:{},
+        newUsuario: {},
+        newCalificacion: {id: 0, idExpediente: "", idTecnico: 0, idCalificaciones: 0},
+        estado: {},
         expediente: {},
-        tipoExpediente: {id:0,tipo:""},
+        tipoExpediente: {id: 0, tipo: ""},
         usuario: {id: 0, idPersona: 0, idTipoUsuario: 0, usuario: "", contraseña: ""},
-        usuarioLogueado: {usuario:""},
-        urgente:{},
+        usuarioLogueado: {usuario: ""},
+        urgente: {},
         calificacion: {},
         clickedRegistrarse: {},
-        
-
     },
-
     /* watch: {
      paises: function (newVal) {
      this.getProvincias(newVal);
@@ -70,16 +72,130 @@ var app = new Vue({
      },
      */
     methods: {
+
+        //Calificacion////////
+
+        calificar: function () {
+            console.log(app.newCalificacion.id, app.newCalificacion.idCalificaciones, app.newCalificacion.idExpediente, app.newCalificacion.idTecnico);
+            var formData = app.toFormData(app.newCalificacion);
+            axios.post("http://localhost/expedientes/php/api.php?action=grabarCalificacion", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.newCalificacion.id = response.data.id;
+                            app.expediente.idCalificacion = app.newCalificacion.id;
+                            app.expediente.idEstado = 1;
+                            app.updateExpediente();
+                            app.successMessage = response.data.message;
+                            app.newCalificacion = {id: 0, idExpediente: "", idTecnico: 0, idCalificaciones: 0};
+                        }
+                    });
+        },
+        getAllCalificaciones: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarCalificaciones")
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.calificaciones = response.data.calificaciones;
+                        }
+                    });
+        },
+        setNewCalificacion: function (e) {
+            app.newCalificacion.id = e.idCalificacion;
+            app.newCalificacion.idExpediente = e.numero;
+            app.newCalificacion.idTecnico = app.usuario.id;
+        },
+        setNewCalificacionIdCalificaciones: function (c) {
+            app.newCalificacion.idCalificaciones = c.id;
+        },
+
+        //Expedientes//////////////////////////////////////////////////////////////
+
+        deleteExpediente: function () {
+
+            var formData = app.toFormData(app.expediente);
+            axios.post("http://localhost/expedientes/php/api.php?action=deleteExpediente", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        //app.expediente = {};
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.successMessage = response.data.message;
+                            app.getAllExpedientes();
+                        }
+                    });
+        },
+        getAllExpedientes: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarExpedientes")
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.expedientes = response.data.expedientes;
+                        }
+                    });
+        },
+        getExpedientesTecnico: function () {
+            //console.log(app.usuario.id,app.usuario.idPersona,app.usuario.idTipoUsuario, app.usuario.usuario,app.usuario.contraseña,"$$$$$");
+            var dataFormat = app.toFormData(app.usuario);
+            axios.post("http://localhost/expedientes/php/api.php?action=mostrarExpedientesTecnico", dataFormat)
+                    .then(function (response) {
+
+                        console.log(response);
+                        if (response.data.error) {
+
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.expedientes = response.data.expedientes;
+                        }
+                    });
+        },
+        generaNumeroExpediente: function () {
+            /*  var formData = app.toFormData(app.expediente);
+             axios.post("http://localhost/expedientes/php/api.php?action=generaNumeroExpediente", formData)
+             .then(function (response) {
+             console.log(response);
+             if (response.data.error) {
+             app.errorMessage = response.data.message;
+             } else {
+             app.successMessage = response.data.message;
+             app.getAllExpedientes();
+             }
+             });*/
+        },
+        selectExpediente: function (expediente) {
+            app.expediente = expediente;
+        },
+
+        updateExpediente: function () {
+            console.log(app.expediente.id, app.expediente.idUrgente, app.expediente.idTipoExpediente, app.expediente.fecha, app.expediente.numero, app.expediente.idTitular, app.expediente.idDireccion, app.expediente.idProyectista, app.expediente.idCalificacion, app.expediente.idIAE, app.expediente.idEstado, app.expediente.descripcion);
+            var formData = app.toFormData(app.expediente);
+            /* axios.post("http://localhost/expedientes/php/api.php?action=updateExpediente", formData)
+             .then(function (response) {
+             console.log(response);
+             //app.expediente = {};
+             if (response.data.error) {
+             app.errorMessage = response.data.message;
+             } else {
+             app.successMessage = response.data.message;
+             app.getAllExpedientes();
+             }
+             });*/
+        },
         //Login//////////////////////////////////////
         comprobarLogin: function () {
             var formData = app.toFormData(app.login);
-            
             axios.post("http://localhost/expedientes/php/api.php?action=comprobarLogin", formData)
                     .then(function (response) {
                         console.log(response);
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
-                            
                         } else {
                             app.usuarioLogueado.usuario = app.login.usuario;
                             app.login = {};
@@ -89,6 +205,99 @@ var app = new Vue({
                             app.sesionTipoUsuario();
                         }
                     });
+        },
+        //NewExpedinte///////////////////////////////////////////////////////////////////////////
+        //
+        //Cargar combo expediente/////////////////
+        cargarCombosExpediente() {
+            app.getAllUrgente();
+            app.getAllTipoExpediente();
+            app.getAllTitulares();
+            app.getAllProyectistas();
+            app.getAllDirecciones();
+            app.getAllIAEs();
+            app.getAllEstados();
+        },
+
+        creaExpediente: function () {
+            console.log(app.newExpediente.id, app.newExpediente.idUrgente, app.newExpediente.idTipoExpediente, app.newExpediente.fecha, app.newExpediente.idTitular, app.newExpediente.idDireccion, app.newExpediente.idProyectista, app.newExpediente.idCalificacion, app.newExpediente.idIAE, app.newExpediente.idEstado, app.newExpediente.direccion);
+            /*   var formData = app.toFormData(app.newExpediente);
+             axios.post("http://localhost/expedientes/php/api.php?action=creaExpediente", formData)
+             .then(function (response) {
+             console.log(response);
+             app.newExpediente = {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular: 0, idDireccion: 0, idProyectista: 0, idCalificacion: 0, idIAE: 0, descripcion: ""};
+             if (response.data.error) {
+             app.errorMessage = response.data.message;
+             } else {
+             app.expediente.id = response.data.id;
+             app.generaNumeroExpediente();
+             app.successMessage = response.data.message;
+             app.getAllExpedientes();
+             }
+             });*/
+        },
+        //Direccion
+        getAllDirecciones: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarDirecciones")
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.direcciones = response.data.direcciones;
+                        }
+                    });
+        },
+        setNewExpedienteIdDireccion(d) {
+            app.newExpediente.idDireccion = d.id;
+        },
+        //Estado
+        getAllEstados: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarEstados")
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.estados = response.data.estados;
+                        }
+                    });
+        },
+        setNewExpedienteIdEstado(d) {
+            app.newExpediente.idEstado = d.id;
+        },
+
+        //IAE
+        getAllIAEs: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarIAEs")
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.IAEs = response.data.IAEs;
+                        }
+                    });
+        },
+        setNewExpedienteIdIAE(d) {
+            app.newExpediente.idIAE = d.id;
+        },
+
+        //TipoExpediente////////////
+        getAllTipoExpediente: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarTipoExpedientes")
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.tipoExpedientes = response.data.tipoExpedientes;
+                        }
+                    });
+        },
+        setNewExpedienteIdTipoExpediente(t) {
+            app.newExpediente.idTipoExpediente = t.id;
+            console.log(app.newExpediente.idTipoExpediente);
         },
         //Tipo Usuario/////
         getAllTipoUsuarios: function () {
@@ -102,99 +311,71 @@ var app = new Vue({
                         }
                     });
         },
+
         setIdTipoUsuario(id) {
             app.newUsuario.idTipoUsuario = id;
         },
-        //Sesion/////////////////
-        sesionTipoUsuario: function () {
-            console.log("chacho", app.usuario.idTipoUsuario, app.usuarioLogueado.usuario);
-            if (app.usuario.idTipoUsuario == 1){
-                app.showingAdministrador = true;
-                app.showingAdministrativo = false;
-                app.showingTecnico = false;
-            }
-            if (app.usuario.idTipoUsuario == 2){  /*Tine que se ==*/
-                app.showingAdministrativo = true;
-                app.showingTecnico = false;
-                app.showingAdministrador = false;
-            }
-            if (app.usuario.idTipoUsuario == 3) {
-                app.showingTecnico = true;
-                app.showingAdministrador = false;
-                app.showingAdministrativo = false;
-                app.getExpedientesTecnico();
-            }
-            
-        },
-        //Calificacion////////
-        setNewCalificacion: function (e) {
-          app.newCalificacion.id = e.idCalificacion;
-          app.newCalificacion.idExpediente = e.numero; 
-          app.newCalificacion.idTecnico = app.usuario.id;
-          
-        },
-        
-        calificar: function () {
-            console.log(app.newCalificacion.id,app.newCalificacion.idCalificaciones,app.newCalificacion.idExpediente,app.newCalificacion.idTecnico);
-            var formData = app.toFormData(app.newCalificacion);
-            axios.post("http://localhost/expedientes/php/api.php?action=actualizarCalificacion", formData)
+        //Titulares/////////////////////////////////
+        getAllTitulares: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarTitulares")
                     .then(function (response) {
                         console.log(response);
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
                         } else {
-                            app.newCalificacion = {};
-                            app.actualizarExpedienteEstado();
-                            app.successMessage = response.data.message;
-                            app.getExpedientesTecnico();
+                            app.titulares = response.data.titulares;
                         }
                     });
         },
-        
-        setCalificacion: function(c){
-            app.newCalificacion.idCalificaciones = c.id;
+
+        setNewExpedienteIdTitular(t) {
+            app.newExpediente.idTitular = t.id;
         },
-        getAllCalificaciones: function () {
-            axios.get("http://localhost/expedientes/php/api.php?action=mostrarCalificaciones")
+        //Urgente//////////
+        getAllUrgente: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarUrgentes")
+                    .then(function (response) {
+                        console.log(response);
+                        app.urgentes = response.data.urgentes;
+                    });
+        },
+        reseteaNewExpediente(){
+          app.newExpediente = {};  
+        },
+        setNewExpedienteIdUrgente: function (u) {
+            /* app.newExpediente.idUrgente = u.id;
+             console.log(app.newExpediente.idUrgente);*/
+            console.log(app.newExpediente.idUrgente);
+        },
+        //Fin newExpediente///////////////////////
+
+        //Persona///////////
+        añadirPersona: function () {
+            app.persona.idDireccion = app.direccion.id;
+            console.log(app.persona.email, app.persona.dni, app.persona.idDireccion, app.persona.nombre, app.persona.telefono);
+            var formData = app.toFormData(app.persona);
+            axios.post("http://localhost/expedientes/php/api.php?action=añadirPersona", formData)
                     .then(function (response) {
                         console.log(response);
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
+                            app.showingPersona = true;
                         } else {
-                            app.calificaciones = response.data.calificaciones;
+                            app.successMessage = response.data.message;
+                            app.persona.id = response.data.id;
+                            app.showingUsuario = true;
                         }
                     });
         },
-        //Estado//////////////
-        actualizarExpedienteEstado: function() {
-            var formData = app.toFormData(app.expediente);
-            axios.post("http://localhost/expedientes/php/api.php?action=actualizarExpedienteEstado", formData)
+        //Proyectista///////////////
+        getAllProyectistas: function () {
+            axios.get("http://localhost/expedientes/php/api.php?action=mostrarProyectistas")
                     .then(function (response) {
                         console.log(response);
                         if (response.data.error) {
                             app.errorMessage = response.data.message;
                         } else {
-                            app.successMessage = response.data.message;
-                            app.getExpedientesTecnico();
-                        }
-                    });
-        },
-        //Usuario/////////////
-        grabarUsuario: function () {
-            app.newUsuario.idPersona = app.persona.id;
-            console.log(app.newUsuario.idPersona, app.newUsuario.idTipoUsuario, app.newUsuario.usuario, app.newUsuario.contraseña);
-            var formData = app.toFormData(app.newUsuario);
-            axios.post("http://localhost/expedientes/php/api.php?action=grabarUsuario", formData)
-                    .then(function (response) {
-                        console.log(response);
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-                        } else {
-                            app.newUsuario = {};
-                            app.successMessage = response.data.message;
-                            app.usuario = response.data.usuario;
-                            app.sesionTipoUsuario();
-                            app.showingUsuario = false;
+                            app.proyectistas = response.data.proyectistas;
                         }
                     });
         },
@@ -225,7 +406,6 @@ var app = new Vue({
                         }
                     });
         },
-        
         getProvincias: function (pais) {
             app.direccion.idPais = pais.id;
             var formData = app.toFormData(pais);
@@ -238,10 +418,8 @@ var app = new Vue({
                             app.provincias = response.data.provincias;
                         }
                     });
-
         },
         getMunicipios: function (p) {
-            //app.direccion.idProvincia = p.id;
             var formData = app.toFormData(p);
             axios.post("http://localhost/expedientes/php/api.php?action=mostrarMunicipios", formData)
                     .then(function (response) {
@@ -252,7 +430,6 @@ var app = new Vue({
                             app.municipios = response.data.municipios;
                         }
                     });
-
         },
         getLocalidades: function (p) {
             var formData = app.toFormData(p);
@@ -265,7 +442,6 @@ var app = new Vue({
                             app.localidades = response.data.localidades;
                         }
                     });
-
         },
         addProvincia: function () {
             app.provincia.idPais = app.direccion.idPais;
@@ -313,7 +489,6 @@ var app = new Vue({
                         }
                     });
         },
-
         setProvincia: function (p) {
             app.direccion.idProvincia = p.id;
         },
@@ -343,129 +518,39 @@ var app = new Vue({
                                 app.successMessage = response.data.message;
                                 app.direccion.id = response.data.insert_id;
                                 app.showingPersona = true;
-
                             }
                         });
             }
-            //      app.showingPersona = true;
-        },
-        //Persona///////////
-        añadirPersona: function () {
-            app.persona.idDireccion = app.direccion.id;
-            console.log(app.persona.email, app.persona.dni, app.persona.idDireccion, app.persona.nombre, app.persona.telefono);
-            var formData = app.toFormData(app.persona);
-            axios.post("http://localhost/expedientes/php/api.php?action=añadirPersona", formData)
-                    .then(function (response) {
-                        console.log(response);
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-                            app.showingPersona = true;
-                        } else {
-                            app.successMessage = response.data.message;
-                            app.persona.id = response.data.id;
-                            app.showingUsuario = true;
 
-                        }
-                    });
+        },
+        //Sesion/////////////////
+        sesionTipoUsuario: function () {
+            console.log("chacho", app.usuario.idTipoUsuario, app.usuarioLogueado.usuario);
+            if (app.usuario.idTipoUsuario == 1) {
+                app.showingAdministrador = true;
+                app.showingAdministrativo = false;
+                app.showingTecnico = false;
+                app.cargarCombosExpediente();
+
+            }
+            if (app.usuario.idTipoUsuario == 2) {  /*Tine que se ==*/
+                app.showingAdministrativo = true;
+                app.showingTecnico = false;
+                app.showingAdministrador = false;
+                app.cargarCombosExpediente();
+
+            }
+            if (app.usuario.idTipoUsuario == 3) {
+                app.showingTecnico = true;
+                app.showingAdministrador = false;
+                app.showingAdministrativo = false;
+                app.getExpedientesTecnico();
+            }
+
         },
 
-        //Expedientes///////////////
-        getExpedientesTecnico: function () {
-            console.log(app.usuario.id,app.usuario.idPersona,app.usuario.idTipoUsuario, app.usuario.usuario,app.usuario.contraseña,"$$$$$");
-            var dataFormat  = app.toFormData(app.usuario);
-             
-            axios.post("http://localhost/expedientes/php/api.php?action=mostrarExpedientesTecnico", dataFormat)
-                    .then(function (response) {
-                     
-                        console.log(response);
-                        if (response.data.error) {
-                          
-                            app.errorMessage = response.data.message;
-                            
-                        } else {
-                            app.expedientes = response.data.expedientes;
-                            
-                        }
-                    });
-        },
-        getAllExpedientes: function () {
-            axios.get("http://localhost/expedientes/php/api.php?action=mostrarExpedientes")
-                    .then(function (response) {
-                        console.log(response);
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-                        } else {
-                            app.expedientes = response.data.expedientes;
-                        }
-                    });
-        },
-        creaExpediente: function () {
+        //Usuarios////////////////////////////////////////////////
 
-            var formData = app.toFormData(app.newExpediente);
-            axios.post("http://localhost/expedientes/php/api.php?action=creaExpediente", formData)
-                    .then(function (response) {
-                        console.log(response);
-                        app.newExpediente = {idUrgente: 0, idTipoExpediente: 0, fecha: "", numero: "", idTitular: 0, idDireccion: 0, idProyectista: 0, idCalificacion: 0, idIAE: 0, descripcion: ""};
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-
-                        } else {
-                            app.expediente.id = response.data.id;
-                            app.generaNumeroExpediente();
-                            app.successMessage = response.data.message;
-                            app.getAllExpedientes();
-                        }
-                    });
-        },
-        generaNumeroExpediente: function () {
-          /*  var formData = app.toFormData(app.expediente);
-            axios.post("http://localhost/expedientes/php/api.php?action=generaNumeroExpediente", formData)
-                    .then(function (response) {
-                        console.log(response);
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-                        } else {
-                            app.successMessage = response.data.message;
-                            app.getAllExpedientes();
-                        }
-                    });*/
-        },
-        
-        updateExpediente: function () {
-
-            var formData = app.toFormData(app.expediente);
-            axios.post("http://localhost/expedientes/php/api.php?action=updateExpediente", formData)
-                    .then(function (response) {
-                        console.log(response);
-                        //app.expediente = {};
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-                        } else {
-                            app.successMessage = response.data.message;
-                            app.getAllExpedientes();
-                        }
-                    });
-        },
-        selectExpediente(expediente) {
-            app.expediente = expediente;
-        },
-        deleteExpediente: function () {
-
-            var formData = app.toFormData(app.expediente);
-            axios.post("http://localhost/expedientes/php/api.php?action=deleteExpediente", formData)
-                    .then(function (response) {
-                        console.log(response);
-                        //app.expediente = {};
-                        if (response.data.error) {
-                            app.errorMessage = response.data.message;
-                        } else {
-                            app.successMessage = response.data.message;
-                            app.getAllExpedientes();
-                        }
-                    });
-        }
-
-        ,
         getAllUsers: function () {
             axios.get("http://localhost/vueCRUD/api.php?action=read")
                     .then(function (response) {
@@ -525,6 +610,25 @@ var app = new Vue({
         selectUser(user) {
             app.clickedUser = user;
         },
+        //Usuario/////////////
+        grabarUsuario: function () {
+            app.newUsuario.idPersona = app.persona.id;
+            console.log(app.newUsuario.idPersona, app.newUsuario.idTipoUsuario, app.newUsuario.usuario, app.newUsuario.contraseña);
+            var formData = app.toFormData(app.newUsuario);
+            axios.post("http://localhost/expedientes/php/api.php?action=grabarUsuario", formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.error) {
+                            app.errorMessage = response.data.message;
+                        } else {
+                            app.newUsuario = {};
+                            app.successMessage = response.data.message;
+                            app.usuario = response.data.usuario;
+                            app.sesionTipoUsuario();
+                            app.showingUsuario = false;
+                        }
+                    });
+        },
 
         //Funcion que pasa un objeto vue a objeto $_post['']
         toFormData: function (obj) {
@@ -538,6 +642,5 @@ var app = new Vue({
             app.errorMessage = "";
             app.successMessage = "";
         },
-
     }
 });
